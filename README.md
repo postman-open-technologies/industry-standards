@@ -5,3 +5,4 @@ This a space for defining industry standards.
 - UK Open Banking
 - FHIR
 - BIAN
+- ISO 20022
