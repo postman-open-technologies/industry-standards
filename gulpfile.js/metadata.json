@@ -1,0 +1,9 @@
+{
+  "environmentVariables": [],
+  "sources": [
+    {
+      "title": "Berlin Group OpenAPI documents",
+      "processor": "../processors/berlin-group.js"
+    }
+  ]
+}

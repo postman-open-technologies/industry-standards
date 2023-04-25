@@ -1,0 +1,12 @@
+extends: airbnb-base
+env:
+  node: true
+  mocha: true
+rules:
+  no-console: "off"
+  radix: "off"
+overrides:
+  - files:
+    - test/**/*.js
+    rules:
+      import/no-extraneous-dependencies: "off"
