@@ -1,0 +1,4113 @@
+openapi: 3.0.1
+info:
+  title: NextGenPSD2 XS2A Framework Implementation Guidelines Extended Services AIS for Savings and Loans Accounts
+  version: "1.1_2022-05-05"
+  description: |
+    # Summary
+    Like a (regular payment) account, specific savings accounts can be addressed in a consent request by identifying the account by its IBAN.
+    In some cases, a savings / loan accountmight not be connected to any globally defined identifier. Therefore, the additional element "other" 
+    is used, which might be provided instead of or in addition to an IBAN thereby identifying the specific  account, for  which a consent is requested.
+    
+    Additionally, a savings account can be addressed by an Account Access Object containing an identifier  of  the  savings account / loan account accompanied by
+    the specification of the cashAccountType to Type "SVGS"/ "LOAN". A consent of this type will grant the access to the related savingsaccount/ loan account, if the
+    ASPSP supports the corresponding endpoints at all.
+    
+    As a third / fourth way to establish a savings specific consent, the TPP can request a bank-offered consent or a global consent but restricting the  requested 
+    access to a certain cashAccountType �e.g. "SVGS" or "LOAN". A consent of this type grant the access to accounts of only the related type (e.g. savings account/
+    loan account),if the ASPSP supports the corresponding endpoints at all.
+    
+  license:
+    name: Creative Commons Attribution 4.0 International Public License
+    url: https://creativecommons.org/licenses/by/4.0/
+  #termsOfService: URL for Terms of Service of the API
+  contact:
+    name: The Berlin Group - A European Standards Initiative
+    url: https://www.berlin-group.org/
+    email: info@berlin-group.org
+    
+externalDocs:
+  description: |
+    Full Documentation of NextGenPSD2 Access to Account Interoperability Framework
+    (General Introduction Paper, Operational Rules, Implementation Guidelines)
+  url: https://www.berlin-group.org/nextgenpsd2-downloads
+
+servers:
+  - url: https://api.tpp.com/psd2
+    description: TPP server
+  
+paths:
+  /v1/loans:
+    get:
+      summary: Read list of savings accounts
+      description: | 
+        Reads a list of loan accounts potentially with additional information, e.g. balance information.
+        It is assumed that a consent of the PSU to this access is already given and stored on the ASPSP system. 
+        The addressed list of savings accounts depends then on the stored consent addressed by consentId,
+        respectively the OAuth2 accesstoken.
+      operationId: readLoanAccountList
+      tags:
+        - Extended Account Information Service (AIS)
+        - loans
+        - account list
+      
+      security:
+      #####################################################
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      # In this file only the basic security element to transport
+      # the bearer token of an OAuth2 process, which has to
+      # be included in the HTTP header is described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation,
+      # it is recommended to adjust the security schemes according to
+      # your system environments and security policies.
+      #####################################################
+        - {}
+        - BearerAuthOAuth: []
+      
+      parameters:
+      #path # NO PATH PARAMETER
+      #query
+      #header
+          #common header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+          #header to support the signature function
+        - $ref: "#/components/parameters/Digest"
+        - $ref: "#/components/parameters/Signature"
+        - $ref: "#/components/parameters/TPP-Signature-Certificate"
+          #method specific header elements
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+          #conditional elemention for AIS
+        - $ref: "#/components/parameters/PSU-IP-Address_conditionalForAis"
+          #optional additional PSU Information in header
+        - $ref: "#/components/parameters/PSU-IP-Port"
+        - $ref: "#/components/parameters/PSU-Accept"
+        - $ref: "#/components/parameters/PSU-Accept-Charset"
+        - $ref: "#/components/parameters/PSU-Accept-Encoding"
+        - $ref: "#/components/parameters/PSU-Accept-Language"
+        - $ref: "#/components/parameters/PSU-User-Agent"
+        - $ref: "#/components/parameters/PSU-Http-Method"
+        - $ref: "#/components/parameters/PSU-Device-ID"
+        - $ref: "#/components/parameters/PSU-Geo-Location"
+      #NO REQUEST BODY
+      
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_LoanAccountList"
+        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400_AIS"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401_AIS"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403_AIS"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404_AIS"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405_AIS"
+        '406':
+          $ref: "#/components/responses/NOT_ACCEPTABLE_406_AIS"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408_AIS"
+        '409':
+          $ref: "#/components/responses/CONFLICT_409_AIS"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415_AIS"
+        '429':
+          $ref: "#/components/responses/TOO_MANY_REQUESTS_429_AIS"
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500_AIS"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503_AIS"
+
+
+  /v1/loans/{loan-account-id}:
+    get:
+      summary: Read loan account details
+      description: | 
+        Reads details about a loan account. 
+        It is assumed that a consent of the PSU to 
+        this access is already given and stored on the ASPSP system. 
+        The addressed details of this account depend then on the stored consent addressed by consentId, 
+        respectively the OAuth2 access token.
+                
+      operationId: readLoanAccountDetails
+      tags:
+        - Account Information Service (AIS)
+        - loans
+        - account details
+      
+      security:
+      #####################################################
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      # In this file only the basic security element to transport
+      # the bearer token of an OAuth2 process, which has to 
+      # be included in the HTTP header is described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation,
+      # it is recommended to adjust the security schemes according to
+      # your system environments and security policies.
+      #####################################################
+        - {}
+        - BearerAuthOAuth: []
+      
+      parameters:
+      #path
+        - $ref: "#/components/parameters/loanAccountId"
+      #header
+          #common header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+          #header to support the signature function
+        - $ref: "#/components/parameters/Digest"
+        - $ref: "#/components/parameters/Signature"
+        - $ref: "#/components/parameters/TPP-Signature-Certificate"
+          #method specific header elements
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+          #conditional elemention for AIS
+        - $ref: "#/components/parameters/PSU-IP-Address_conditionalForAis"
+          #optional additional PSU Information in header
+        - $ref: "#/components/parameters/PSU-IP-Port"
+        - $ref: "#/components/parameters/PSU-Accept"
+        - $ref: "#/components/parameters/PSU-Accept-Charset"
+        - $ref: "#/components/parameters/PSU-Accept-Encoding"
+        - $ref: "#/components/parameters/PSU-Accept-Language"
+        - $ref: "#/components/parameters/PSU-User-Agent"
+        - $ref: "#/components/parameters/PSU-Http-Method"
+        - $ref: "#/components/parameters/PSU-Device-ID"
+        - $ref: "#/components/parameters/PSU-Geo-Location"
+      #NO REQUEST BODY
+      
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_LoanAccountDetails"
+        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400_AIS"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401_AIS"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403_AIS"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404_AIS"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405_AIS"
+        '406':
+          $ref: "#/components/responses/NOT_ACCEPTABLE_406_AIS"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408_AIS"
+        '409':
+          $ref: "#/components/responses/CONFLICT_409_AIS"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415_AIS"
+        '429':
+          $ref: "#/components/responses/TOO_MANY_REQUESTS_429_AIS"
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500_AIS"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503_AIS"
+
+
+  /v1/loans/{loan-account-id}/balances:
+
+    get:
+      summary: Read Loan Account Balances
+      description: |
+        Reads balance data from a given loan account addressed by "loan-account-id".
+        
+        The loan-account-id is constant at least throughout the lifecycle of a given consent.
+        Note: The original balance of the loan at the start date might be provided e.g. by a balance of type "openingBooked" and the referenceDate of the loan starting date.
+      operationId: readSavingsAccountBalances
+      tags:
+        - Account Information Service (AIS)
+        - loans
+        - balances
+      
+      security:
+      #####################################################
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      # In this file only the basic security element to transport
+      # the bearer token of an OAuth2 process, which has to 
+      # be included in the HTTP header is described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation,
+      # it is recommended to adjust the security schemes according to
+      # your system environments and security policies.
+      #####################################################
+        - {}
+        - BearerAuthOAuth: []
+      
+      parameters:
+      #path
+        - $ref: "#/components/parameters/loanAccountId"
+      #query # NO QUERY PARAMETER
+      #header
+          #common header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+          #header to support the signature function
+        - $ref: "#/components/parameters/Digest"
+        - $ref: "#/components/parameters/Signature"
+        - $ref: "#/components/parameters/TPP-Signature-Certificate"
+          #method specific header elements
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+          #conditional elemention for AIS
+        - $ref: "#/components/parameters/PSU-IP-Address_conditionalForAis"
+          #optional additional PSU Information in header
+        - $ref: "#/components/parameters/PSU-IP-Port"
+        - $ref: "#/components/parameters/PSU-Accept"
+        - $ref: "#/components/parameters/PSU-Accept-Charset"
+        - $ref: "#/components/parameters/PSU-Accept-Encoding"
+        - $ref: "#/components/parameters/PSU-Accept-Language"
+        - $ref: "#/components/parameters/PSU-User-Agent"
+        - $ref: "#/components/parameters/PSU-Http-Method"
+        - $ref: "#/components/parameters/PSU-Device-ID"
+        - $ref: "#/components/parameters/PSU-Geo-Location"
+      #NO REQUEST BODY
+      
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_LoanAccountBalances"
+        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400_AIS"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401_AIS"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403_AIS"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404_AIS"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405_AIS"
+        '406':
+          $ref: "#/components/responses/NOT_ACCEPTABLE_406_AIS"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408_AIS"
+        '409':
+          $ref: "#/components/responses/CONFLICT_409_AIS"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415_AIS"
+        '429':
+          $ref: "#/components/responses/TOO_MANY_REQUESTS_429_AIS"
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500_AIS"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503_AIS"
+
+
+  /v1/loans/{loan-account-id}/transactions:
+    get:
+      summary: Read transaction list of a loan account
+      description: |
+        'Reads transaction data from a given loan account addressed by "loan-account-id". 
+        This can be booked or pending transactions. 
+        
+        Note: The ASPSP might use standard compression methods on application level for the response message 
+        as indicated in the content encoding header. 
+        
+        Remark: Please note that the PATH might be already given in detail by the response of the 
+        "Read Loan Account List" call within the _links subfield.'
+      operationId: readSavingsAccountTransactionList
+      tags:
+        - Account Information Service (AIS)
+        - loans
+        - transactions
+      
+      security:
+      #####################################################
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      # In this file only the basic security element to transport
+      # the bearer token of an OAuth2 process, which has to 
+      # be included in the HTTP header is described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation,
+      # it is recommended to adjust the security schemes according to
+      # your system environments and security policies.
+      #####################################################
+        - {}
+        - BearerAuthOAuth: []
+      
+      parameters:
+      #path
+        - $ref: "#/components/parameters/loanAccountId"
+      #query
+        - $ref: "#/components/parameters/dateFrom"
+        - $ref: "#/components/parameters/dateTo"
+        - $ref: "#/components/parameters/entryReferenceFrom"
+        - $ref: "#/components/parameters/bookingStatusGeneric"
+        - $ref: "#/components/parameters/deltaList"
+      #header
+          #common header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+          #header to support the signature function
+        - $ref: "#/components/parameters/Digest"
+        - $ref: "#/components/parameters/Signature"
+        - $ref: "#/components/parameters/TPP-Signature-Certificate"
+          #method specific header elements
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+        #- $ref: "#/components/parameters/Accept" #Can not defined in Open API. See general comments in the description attached to the top level of the file.
+          #conditional elemention for AIS
+        - $ref: "#/components/parameters/PSU-IP-Address_conditionalForAis"
+          #optional additional PSU Information in header
+        - $ref: "#/components/parameters/PSU-IP-Port"
+        - $ref: "#/components/parameters/PSU-Accept"
+        - $ref: "#/components/parameters/PSU-Accept-Charset"
+        - $ref: "#/components/parameters/PSU-Accept-Encoding"
+        - $ref: "#/components/parameters/PSU-Accept-Language"
+        - $ref: "#/components/parameters/PSU-User-Agent"
+        - $ref: "#/components/parameters/PSU-Http-Method"
+        - $ref: "#/components/parameters/PSU-Device-ID"
+        - $ref: "#/components/parameters/PSU-Geo-Location"
+      #NO REQUEST BODY
+      
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_LoanAccountsTransactions"
+        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400_AIS"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401_AIS"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403_AIS"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404_AIS"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405_AIS"
+        '406':
+          $ref: "#/components/responses/NOT_ACCEPTABLE_406_AIS"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408_AIS"
+        '409':
+          $ref: "#/components/responses/CONFLICT_409_AIS"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415_AIS"
+        '429':
+          $ref: "#/components/responses/TOO_MANY_REQUESTS_429_AIS"
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500_AIS"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503_AIS"
+
+
+
+  /v1/savings:
+    get:
+      summary: Read list of savings accounts
+      description: | 
+        Reads a list of savings accounts potentially with additional information, e.g. balance information.
+        It is assumed that a consent of the PSU to this access is already given and stored on the ASPSP system. 
+        The addressed list of savings accounts depends then on the stored consent addressed by consentId,
+        respectively the OAuth2 accesstoken.
+      operationId: readSavingsAccountList
+      tags:
+        - Extended Account Information Service (AIS)
+        - savings
+        - account list
+      
+      security:
+      #####################################################
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      # In this file only the basic security element to transport
+      # the bearer token of an OAuth2 process, which has to
+      # be included in the HTTP header is described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation,
+      # it is recommended to adjust the security schemes according to
+      # your system environments and security policies.
+      #####################################################
+        - {}
+        - BearerAuthOAuth: []
+      
+      parameters:
+      #path # NO PATH PARAMETER
+      #query
+      #header
+          #common header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+          #header to support the signature function
+        - $ref: "#/components/parameters/Digest"
+        - $ref: "#/components/parameters/Signature"
+        - $ref: "#/components/parameters/TPP-Signature-Certificate"
+          #method specific header elements
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+          #conditional elemention for AIS
+        - $ref: "#/components/parameters/PSU-IP-Address_conditionalForAis"
+          #optional additional PSU Information in header
+        - $ref: "#/components/parameters/PSU-IP-Port"
+        - $ref: "#/components/parameters/PSU-Accept"
+        - $ref: "#/components/parameters/PSU-Accept-Charset"
+        - $ref: "#/components/parameters/PSU-Accept-Encoding"
+        - $ref: "#/components/parameters/PSU-Accept-Language"
+        - $ref: "#/components/parameters/PSU-User-Agent"
+        - $ref: "#/components/parameters/PSU-Http-Method"
+        - $ref: "#/components/parameters/PSU-Device-ID"
+        - $ref: "#/components/parameters/PSU-Geo-Location"
+      #NO REQUEST BODY
+      
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_SavingsAccountList"
+        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400_AIS"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401_AIS"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403_AIS"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404_AIS"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405_AIS"
+        '406':
+          $ref: "#/components/responses/NOT_ACCEPTABLE_406_AIS"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408_AIS"
+        '409':
+          $ref: "#/components/responses/CONFLICT_409_AIS"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415_AIS"
+        '429':
+          $ref: "#/components/responses/TOO_MANY_REQUESTS_429_AIS"
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500_AIS"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503_AIS"
+
+
+  /v1/savings/{savings-account-id}:
+    get:
+      summary: Read savings account details
+      description: | 
+        Reads details about a savings account. 
+        It is assumed that a consent of the PSU to 
+        this access is already given and stored on the ASPSP system. 
+        The addressed details of this account depend then on the stored consent addressed by consentId, 
+        respectively the OAuth2 access token.
+                
+      operationId: readSavingsAccountDetails
+      tags:
+        - Account Information Service (AIS)
+        - savings
+        - account details
+      
+      security:
+      #####################################################
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      # In this file only the basic security element to transport
+      # the bearer token of an OAuth2 process, which has to 
+      # be included in the HTTP header is described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation,
+      # it is recommended to adjust the security schemes according to
+      # your system environments and security policies.
+      #####################################################
+        - {}
+        - BearerAuthOAuth: []
+      
+      parameters:
+      #path
+        - $ref: "#/components/parameters/savingsAccountId"
+      #header
+          #common header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+          #header to support the signature function
+        - $ref: "#/components/parameters/Digest"
+        - $ref: "#/components/parameters/Signature"
+        - $ref: "#/components/parameters/TPP-Signature-Certificate"
+          #method specific header elements
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+          #conditional elemention for AIS
+        - $ref: "#/components/parameters/PSU-IP-Address_conditionalForAis"
+          #optional additional PSU Information in header
+        - $ref: "#/components/parameters/PSU-IP-Port"
+        - $ref: "#/components/parameters/PSU-Accept"
+        - $ref: "#/components/parameters/PSU-Accept-Charset"
+        - $ref: "#/components/parameters/PSU-Accept-Encoding"
+        - $ref: "#/components/parameters/PSU-Accept-Language"
+        - $ref: "#/components/parameters/PSU-User-Agent"
+        - $ref: "#/components/parameters/PSU-Http-Method"
+        - $ref: "#/components/parameters/PSU-Device-ID"
+        - $ref: "#/components/parameters/PSU-Geo-Location"
+      #NO REQUEST BODY
+      
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_SavingsAccountDetails"
+        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400_AIS"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401_AIS"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403_AIS"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404_AIS"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405_AIS"
+        '406':
+          $ref: "#/components/responses/NOT_ACCEPTABLE_406_AIS"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408_AIS"
+        '409':
+          $ref: "#/components/responses/CONFLICT_409_AIS"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415_AIS"
+        '429':
+          $ref: "#/components/responses/TOO_MANY_REQUESTS_429_AIS"
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500_AIS"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503_AIS"
+
+
+  /v1/savings/{savings-account-id}/balances:
+
+    get:
+      summary: Read Savings Account Balances
+      description: |
+        Reads balancedata from a given savings account addressed by "savings-account-id".
+        
+        The savings-account-id is constant at least throughout the lifecycle of a given consent.
+      operationId: readSavingsAccountBalances
+      tags:
+        - Account Information Service (AIS)
+        - savings
+        - balances
+      
+      security:
+      #####################################################
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      # In this file only the basic security element to transport
+      # the bearer token of an OAuth2 process, which has to 
+      # be included in the HTTP header is described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation,
+      # it is recommended to adjust the security schemes according to
+      # your system environments and security policies.
+      #####################################################
+        - {}
+        - BearerAuthOAuth: []
+      
+      parameters:
+      #path
+        - $ref: "#/components/parameters/savingsAccountId"
+      #query # NO QUERY PARAMETER
+      #header
+          #common header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+          #header to support the signature function
+        - $ref: "#/components/parameters/Digest"
+        - $ref: "#/components/parameters/Signature"
+        - $ref: "#/components/parameters/TPP-Signature-Certificate"
+          #method specific header elements
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+          #conditional elemention for AIS
+        - $ref: "#/components/parameters/PSU-IP-Address_conditionalForAis"
+          #optional additional PSU Information in header
+        - $ref: "#/components/parameters/PSU-IP-Port"
+        - $ref: "#/components/parameters/PSU-Accept"
+        - $ref: "#/components/parameters/PSU-Accept-Charset"
+        - $ref: "#/components/parameters/PSU-Accept-Encoding"
+        - $ref: "#/components/parameters/PSU-Accept-Language"
+        - $ref: "#/components/parameters/PSU-User-Agent"
+        - $ref: "#/components/parameters/PSU-Http-Method"
+        - $ref: "#/components/parameters/PSU-Device-ID"
+        - $ref: "#/components/parameters/PSU-Geo-Location"
+      #NO REQUEST BODY
+      
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_SavingsAccountBalances"
+        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400_AIS"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401_AIS"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403_AIS"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404_AIS"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405_AIS"
+        '406':
+          $ref: "#/components/responses/NOT_ACCEPTABLE_406_AIS"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408_AIS"
+        '409':
+          $ref: "#/components/responses/CONFLICT_409_AIS"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415_AIS"
+        '429':
+          $ref: "#/components/responses/TOO_MANY_REQUESTS_429_AIS"
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500_AIS"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503_AIS"
+
+
+  /v1/savings/{savings-account-id}/transactions:
+    get:
+      summary: Read transaction list of a savings account
+      description: |
+        'Reads transaction data from a given savings account addressed by "savings-account-id". 
+        This can be booked or pending transactions. 
+        
+        Note: The ASPSP might use standard compression methods on application level for the response message 
+        as indicated in the content encoding header. 
+        
+        Remark: Please note that the PATH might be already given in detail by the response of the 
+        "Read Savings Account List" call within the _links subfield.'
+      operationId: readSavingsAccountTransactionList
+      tags:
+        - Account Information Service (AIS)
+        - savings
+        - transactions
+      
+      security:
+      #####################################################
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      # In this file only the basic security element to transport
+      # the bearer token of an OAuth2 process, which has to 
+      # be included in the HTTP header is described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation,
+      # it is recommended to adjust the security schemes according to
+      # your system environments and security policies.
+      #####################################################
+        - {}
+        - BearerAuthOAuth: []
+      
+      parameters:
+      #path
+        - $ref: "#/components/parameters/savingsAccountId"
+      #query
+        - $ref: "#/components/parameters/dateFrom"
+        - $ref: "#/components/parameters/dateTo"
+        - $ref: "#/components/parameters/entryReferenceFrom"
+        - $ref: "#/components/parameters/bookingStatusSavings"
+        - $ref: "#/components/parameters/deltaList"
+      #header
+          #common header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+          #header to support the signature function
+        - $ref: "#/components/parameters/Digest"
+        - $ref: "#/components/parameters/Signature"
+        - $ref: "#/components/parameters/TPP-Signature-Certificate"
+          #method specific header elements
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+        #- $ref: "#/components/parameters/Accept" #Can not defined in Open API. See general comments in the description attached to the top level of the file.
+          #conditional elemention for AIS
+        - $ref: "#/components/parameters/PSU-IP-Address_conditionalForAis"
+          #optional additional PSU Information in header
+        - $ref: "#/components/parameters/PSU-IP-Port"
+        - $ref: "#/components/parameters/PSU-Accept"
+        - $ref: "#/components/parameters/PSU-Accept-Charset"
+        - $ref: "#/components/parameters/PSU-Accept-Encoding"
+        - $ref: "#/components/parameters/PSU-Accept-Language"
+        - $ref: "#/components/parameters/PSU-User-Agent"
+        - $ref: "#/components/parameters/PSU-Http-Method"
+        - $ref: "#/components/parameters/PSU-Device-ID"
+        - $ref: "#/components/parameters/PSU-Geo-Location"
+      #NO REQUEST BODY
+      
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_SavingsAccountsTransactions"
+        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400_AIS"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401_AIS"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403_AIS"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404_AIS"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405_AIS"
+        '406':
+          $ref: "#/components/responses/NOT_ACCEPTABLE_406_AIS"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408_AIS"
+        '409':
+          $ref: "#/components/responses/CONFLICT_409_AIS"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415_AIS"
+        '429':
+          $ref: "#/components/responses/TOO_MANY_REQUESTS_429_AIS"
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500_AIS"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503_AIS"
+
+
+components:
+#####################################################
+# Predefined Components
+#####################################################
+
+  securitySchemes:
+  #####################################################
+  # Predefined Security Schemes:
+  #
+  # In this file only the basic security element to transport
+  # the bearer token of an OAuth2 process, which has to 
+  # be included in the HTTP header is described.
+  #
+  # WARNING:
+  # If you want to use this file for a productive implementation, 
+  # it is recommended to adjust the security schemes according to 
+  # your system environments and security policies.
+  #####################################################
+    BearerAuthOAuth:
+      description: |
+        Bearer Token. 
+        
+        Is contained only, if an OAuth2 based authentication was performed in a pre-step or 
+        an OAuth2 based SCA was performed in a preceding AIS service in the same session.
+      type: http
+      scheme: bearer
+
+
+  schemas:
+  #####################################################
+  # Predefined Schemas
+  #####################################################
+
+
+    accountDetailsSavingsLoans:
+      description: |
+        Details of a savings or loans account
+      type: object
+      required:
+        - currency
+      properties:
+        resourceId:
+          description: This shall be filled, if addressable resource are created by the ASPSP on the /savings or /loans endpoint.
+          type: string
+        iban:
+          $ref: "#/components/schemas/iban"
+        bban:
+          $ref: "#/components/schemas/bban"
+        msisdn:
+          $ref: "#/components/schemas/msisdn"
+        other:
+          $ref: "#/components/schemas/otherType"
+        currency:
+          $ref: "#/components/schemas/currencyCode"
+        ownerName:
+          description: 
+            Name of the legal account owner. If there is more than one owner, then e.g. two names might be noted here.
+            For a corporate account, the corporate name is used for this attribute. Even if supported by the ASPSP, 
+            the provision of this field might depend on the fact whether anexplicit consent to this specific additional 
+            account information has been given by the PSU.
+          type: string
+          maxLength: 140
+        name:
+          description: 
+            Name of the account, as assigned by the ASPSP,
+            in agreement with the account owner in order to provide an additional means of identification of the account.
+          type: string
+          maxLength: 70
+        displayName:
+          description: 
+            Name of the account as defined by the PSU within online channels.
+          type: string
+          maxLength: 70
+        product:
+          description: Product name of the bank for this account, proprietary definition.
+          type: string
+          maxLength: 35
+        cashAccountType:
+          $ref: "#/components/schemas/cashAccountType"
+        status:
+          description: |
+            Account status. The value is one of the following:
+              - "enabled": account is available
+              - "deleted": account is terminated
+              - "blocked": account is blocked e.g. for legal reasons
+            If this field is not used, than the account is available in the sense of this specification.
+          type: string
+          enum:
+            - "enabled"
+            - "deleted"
+            - "blocked"
+        bic:
+          $ref: "#/components/schemas/bicfi"
+        interest:
+          description: |
+            A set of interest rates associated to this account, e.g. interests for savings or credits.Optionally used for savings accounts and loan accounts.
+          type: array
+          items:
+            $ref: "#/components/schemas/interest"
+        relatedDates: 
+          $ref: "#/components/schemas/relatedDates"
+        collateralsInvolved:
+          description: |
+            'Only used for loan accounts: Is set to true if a collateral is involved securing the loan.
+            (e.g. security deposit, physical collaterals like houses, cars). More information might be provided under the "details" attribute.'
+          type: boolean
+        guarateeInvolved:
+          description: |
+            'Only used for loan accounts: Is set to true in  case  of  specific collaterals  where  a guarantee of payment of the loan is given by a different person.'
+          type: boolean
+        linkedAccounts:
+          description: Case of a set of pending card transactions, the APSP will provide the relevant cash account associated to pending loan, savings or card transactions.
+          type: string
+          maxLength: 70
+        usage:
+          description: |
+            Specifies the usage of the account:
+              * PRIV: private personal account
+              * ORGA: professional account
+          type: string
+          maxLength: 4
+          enum:
+            - "PRIV"
+            - "ORGA"
+        details:
+          description: |
+            Specifications that might be provided by the ASPSP:
+              - characteristics of the account
+              - characteristics of the relevant card
+              - characteristics of the savings account, and the ASPSP will provide specification for each deposit
+              - characteristics of the loan
+          type: string
+          maxLength: 500
+        balances:
+          description: |
+            A list of balances regarding this account, e.g. the current balance, the last booked balance.
+            The list might be restricted to the current balance.
+          type: array
+          items:
+            $ref: "#/components/schemas/balance"
+        _links:
+          $ref: "#/components/schemas/_linksAccountDetails"
+
+
+    accountReference:
+      description: | 
+        Reference to an account by either
+          * IBAN, of a payment accounts, or
+          * BBAN, for payment accounts if there is no IBAN, or 
+          * the Primary Account Number (PAN) of a card, can be tokenised by the ASPSP due to PCI DSS requirements, or
+          * the Primary Account Number (PAN) of a card in a masked form, or
+          * an alias to access a payment account via a registered mobile phone number (MSISDN), or
+          * a proprietary ID of the  respective account that uniquely identifies the account for this ASPSP.
+      type: object
+      properties:
+        iban: 
+          $ref: "#/components/schemas/iban"
+        bban: 
+          $ref: "#/components/schemas/bban"
+        pan: 
+          $ref: "#/components/schemas/pan"
+        maskedPan: 
+          $ref: "#/components/schemas/maskedPan"
+        msisdn: 
+          $ref: "#/components/schemas/msisdn"
+        other:
+          $ref: "#/components/schemas/otherType"
+        currency:
+          $ref: "#/components/schemas/currencyCode"
+        cashAccountType:
+          $ref: "#/components/schemas/cashAccountType"
+
+
+    accountReport:
+      description: |
+        JSON based account report.
+        This account report contains transactions resulting from the query parameters.
+        
+        'booked' shall be contained if bookingStatus parameter is set to "booked" or "both".
+        
+        'pending' is not contained if the bookingStatus parameter is set to "booked" or "information".
+
+        'information' Only contained if the bookingStatus is set to "information" and if supported by ASPSP.
+      type: object
+      required:
+        - _links
+      properties:
+        booked:
+          description: Array of transaction details.
+          type: array
+          items: 
+            $ref: "#/components/schemas/transactions"
+        pending:
+          description: Array of transaction details.
+          type: array
+          items: 
+            $ref: "#/components/schemas/transactions"
+        information:
+          description: Array of transaction details.
+          type: array
+          items: 
+            $ref: "#/components/schemas/transactions"
+        _links:
+          $ref: "#/components/schemas/_linksAccountReportSavingsLoans"
+
+
+    amount:
+      type: object
+      required:
+        - currency
+        - amount
+      properties:
+        currency:
+          $ref: "#/components/schemas/currencyCode"
+        amount:
+          description: |
+            The amount given with fractional digits, where fractions must be compliant to the currency definition.
+            Up to 14 significant figures. Negative amounts are signed by minus.
+            The decimal separator is a dot.
+            
+            **Example:**
+            Valid representations for EUR with up to two decimals are:
+            
+              * 1056
+              * 5768.2
+              * -1.50
+              * 5877.78
+          type: string
+          pattern: "-?[0-9]{1,14}(\\.[0-9]{1,3})?"
+          example: "5877.78"
+      example: 
+        {
+          "currency": "EUR", 
+          "amount": "123"
+        }
+
+
+    amountDependentRate:
+      description: Used in case of FC index
+      type: object
+      required:
+        - percentage
+      properties:
+        percentage:
+          description: 
+            'The (signed) rate of the interest.
+            Remark: ISO 20022 is defining Percentage as a decimal type, where 5.0 expresses 5% interest rate. This specification is using 
+            a signed percentage to be able to express also negative percentage codes, i.e. -1.2 will express -1,2% of interest.'
+          type: string
+          example: "-0.3"
+        fromAmount:
+          $ref: "#/components/schemas/amount"
+        toAmount:
+          $ref: "#/components/schemas/amount"
+
+
+    balance:
+      description: |
+        A single balance element.
+      type:
+        object
+      required:
+        - balanceAmount
+        - balanceType
+      properties:
+        balanceAmount:
+          $ref: "#/components/schemas/amount"
+        balanceType:
+          $ref: "#/components/schemas/balanceType"
+        creditLimitIncluded:
+          description: |
+            A flag indicating if the credit limit of the corresponding account 
+            is included in the calculation of the balance, where applicable.
+          type: boolean
+          example: false
+        lastChangeDateTime:
+          description: |
+            This data element might be used to indicate e.g. with the expected or booked balance that no action is known 
+            on the account, which is not yet booked.
+          type: string
+          format: date-time
+        referenceDate:
+          description: Indicates the date of the balance.
+          type: string
+          format: date
+        lastCommittedTransaction:
+          description: |
+            "entryReference" of the last commited transaction to support the TPP in identifying whether all 
+            PSU transactions are already known.
+          type: string
+          maxLength: 35
+
+
+    balanceType:
+      description: |
+        The following balance types are defined:
+          - "closingBooked": 
+            Balance of the account at the end of the pre-agreed account reporting period. 
+            It is the sum of the opening booked balance at the beginning of the period and all entries booked 
+            to the account during the pre-agreed account reporting period.
+            
+            For card-accounts, this is composed of
+            
+              - invoiced, but not yet paid entries
+            
+          - "expected":
+            Balance composed of booked entries and pending items known at the time of calculation, 
+            which projects the end of day balance if everything is booked on the account and no other entry is posted.
+            
+            For card accounts, this is composed of:
+              - invoiced, but not yet paid entries
+              - not yet invoiced but already booked entries and
+              - pending items (not yet booked)
+            
+            ###For card-accounts:
+            ###
+            ###"money to spend with the value of a pre-approved credit limit on the card account"
+            ###
+            For savings and loans:
+            
+            estimated balance (e.g. including an upcoming interest payment) for the referenced date.
+            
+          - "openingBooked":
+            Book balance of the account at the beginning of the account reporting period. 
+            It always equals the closing book balance from the previous report.
+          - "interimAvailable":
+            Available balance calculated in the course of the account ?servicer?s business day, 
+            at the time specified, and subject to further changes during the business day. 
+            The interim balance is calculated on the basis of booked credit and debit items during the calculation 
+            time/period specified.
+            
+            For card-accounts, this is composed of:
+              - invoiced, but not yet paid entries
+              - not yet invoiced but already booked entries
+            NOT used for savings and loans.
+            
+          - "interimBooked":
+            Balance calculated in the course of the account servicer's business day, at the time specified, 
+            and subject to further changes during the business day. 
+            The interim balance is calculated on the basis of booked credit and debit items during the calculation time/period 
+            specified.
+            
+          - "forwardAvailable":
+            Forward available balance of money that is at the disposal of the account owner on the date specified.
+            NOT used for savings and loans.
+            
+          - "nonInvoiced": 
+            Only for card accounts, to be defined yet.
+      type: string
+      enum:
+          - "closingBooked"
+          - "expected"
+          - "openingBooked"
+          - "interimAvailable"
+          - "interimBooked"
+          - "forwardAvailable"
+          - "nonInvoiced"
+
+
+    bankTransactionCode: 
+      description: |
+        Bank transaction code as used by the ASPSP and using the sub elements of this structured code defined by ISO 20022. 
+        
+        This code type is concatenating the three ISO20022 Codes 
+          * Domain Code, 
+          * Family Code, and 
+          * SubFamiliy Code 
+        by hyphens, resulting in 'DomainCode'-'FamilyCode'-'SubFamilyCode'.
+        For standing order reports the following codes are applicable:
+          * "PMNT-ICDT-STDO" for credit transfers,
+          * "PMNT-IRCT-STDO"  for instant credit transfers
+          * "PMNT-ICDT-XBST" for cross-border credit transfers
+          * "PMNT-IRCT-XBST" for cross-border real time credit transfers and
+          * "PMNT-MCOP-OTHR" for specific standing orders which have a dynamical amount to move left funds e.g. on month end to a saving account
+        
+      type: string
+      example: "PMNT-RDDT-ESDD"
+
+
+    bban:
+      description: |
+        Basic Bank Account Number (BBAN) Identifier.
+        
+        This data element can be used in the body of the consent request.
+          Message for retrieving account access consent from this account. This
+          data elements is used for payment accounts which have no IBAN.
+          ISO20022: Basic Bank Account Number (BBAN). 
+          
+          Identifier used nationally by financial institutions, i.e., in individual countries, 
+          generally as part of a National Account Numbering Scheme(s), 
+          which uniquely identifies the account of a customer.
+      type: string
+      pattern: "[a-zA-Z0-9]{1,30}" 
+      example: "BARC12345612345678"
+
+
+    bicfi: 
+      description: |
+        BICFI
+      type: string
+      pattern: '[A-Z]{6,6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3,3}){0,1}'
+      example: "AAAADEBBXXX"
+
+
+    camt.052: 
+      description: |
+        camt.052 XML message.
+      type: string
+
+
+    camt.053:
+      description: |
+        camt.053 XML message.
+      type: string
+
+
+    camt.054: 
+      description: |
+        camt.054 XML message.
+      type: string
+
+
+    cashAccountType:
+      description: |
+        ExternalCashAccountType1Code from ISO 20022.
+      type: string
+#      enum:
+#        - "CACC"
+#        - "CARD"
+#        - "CASH"
+#        - "CHAR"
+#        - "CISH"
+#        - "COMM"
+#        - "CPAC"
+#        - "LLSV"
+#        - "LOAN"
+#        - "MGLD"
+#        - "MOMA"
+#        - "NREX"
+#        - "ODFT"
+#        - "ONDP"
+#        - "OTHR"
+#        - "SACC"
+#        - "SLRY"
+#        - "SVGS"
+#        - "TAXE"
+#        - "TRAN"
+#        - "TRAS"
+
+
+    currencyCode:
+      description: |
+        ISO 4217 Alpha 3 currency code.
+      type: string
+      pattern: '[A-Z]{3}'
+      example: "EUR"
+
+
+    EntryDetailsElement:
+      type: object
+      required:
+        - transactionAmount
+      properties:
+        endToEndId:
+          description: Unique end to end identity.
+          type: string
+          maxLength: 35
+        mandateId:
+          description: Identification of Mandates, e.g. a SEPA Mandate ID.
+          type: string
+          maxLength: 35
+        checkId:
+          description: Identification of a Cheque.
+          type: string
+          maxLength: 35
+        creditorId:
+          type: string
+          maxLength: 35
+        transactionAmount:
+           $ref: "#/components/schemas/amount"
+        currencyExchange:
+          type: array
+          items: 
+            $ref: "#/components/schemas/reportExchangeRate"
+        creditorName:
+          type: string
+          maxLength: 70
+        creditorAccount:
+          $ref: "#/components/schemas/accountReference"
+        creditorAgent:
+          $ref: "#/components/schemas/bicfi"
+        ultimateCreditor:
+          type: string
+          maxLength: 70
+        debtorName:
+          type: string
+          maxLength: 70
+        debtorAccount:
+          $ref: "#/components/schemas/accountReference"
+        debtorAgent:
+          $ref: "#/components/schemas/bicfi"
+        ultimateDebtor:
+          type: string
+          maxLength: 70
+        remittanceInformationUnstructured: 
+          type: string
+          maxLength: 140
+          example: "Ref Number Merchant"
+        remittanceInformationUnstructuredArray: 
+          type: array
+          items:
+            type: string
+            maxLength: 140
+          example: ["Ref Number Merchant", "Some Other Text"]
+        remittanceInformationStructured:
+          $ref: "#/components/schemas/remittanceInformationStructured"
+        remittanceInformationStructuredArray:
+          type: array
+          items:
+            $ref: "#/components/schemas/remittanceInformationStructured"
+        purposeCode:
+          $ref: "#/components/schemas/purposeCode"
+
+
+    Error400_AIS: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 400 for AIS.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode400_AIS"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode400_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error401_AIS: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 401 for AIS.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode401_AIS"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode401_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error403_AIS: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 403 for AIS.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode403_AIS"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode403_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error404_AIS: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 404 for AIS.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode404_AIS"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode404_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error405_AIS: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 405 for AIS.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode405_AIS"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode405_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error406_AIS: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 406 for AIS.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode406_AIS"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode406_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error409_AIS: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 409 for AIS.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode409_AIS"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode409_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error429_AIS: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 429 for AIS.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode429_AIS"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: |
+              This is a data element to support the declaration of additional errors in the context of [RFC7807] 
+              in case of a HTTP error code 429 for. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode429_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error400_NG_AIS: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 400.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage400_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error401_NG_AIS: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 401.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage401_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error403_NG_AIS: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 403.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage403_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error404_NG_AIS: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 404.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage404_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error405_NG_AIS: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 401.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage405_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error406_NG_AIS: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 406.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage406_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+
+    Error409_NG_AIS: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 409.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage409_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+      example:
+        [{
+          "category": "ERROR",
+          "code": "STATUS_INVALID",
+          "text": "additional text information of the ASPSP up to 500 characters"
+        }]
+
+
+    Error429_NG_AIS: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 429.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage429_AIS"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+      example:
+        [{
+          "category": "ERROR",
+          "code": "ACCESS_EXCEEDED",
+          "text": "additional text information of the ASPSP up to 500 characters"
+        }]
+
+
+    executionRule:
+      description: |
+        "following" or "preceding" supported as values. 
+        This data attribute defines the behaviour when recurring payment dates falls on a weekend or bank holiday. 
+        The payment is then executed either the "preceding" or "following" working day.
+        ASPSP might reject the request due to the communicated value, if rules in Online-Banking are not supporting 
+        this execution rule.
+      type: string
+      enum:
+        - "following"
+        - "preceding"
+
+
+    frequencyCode:
+      description: |
+        The following codes from the "EventFrequency7Code" of ISO 20022 are supported:
+        - "Daily"
+        - "Weekly"
+        - "EveryTwoWeeks"
+        - "Monthly"
+        - "EveryTwoMonths"
+        - "Quarterly"
+        - "SemiAnnual"
+        - "Annual"
+        - "MonthlyVariable"
+      type: string
+      enum:
+        - "Daily"
+        - "Weekly"
+        - "EveryTwoWeeks"
+        - "Monthly"
+        - "EveryTwoMonths"
+        - "Quarterly"
+        - "SemiAnnual"
+        - "Annual"
+        - "MonthlyVariable"
+
+
+    hrefType:
+      description: Link to a resource.
+      type: object
+      properties:
+        href:
+          description: Link to a resource.
+          type: string
+          example: "/v1/payments/sepa-credit-transfers/1234-wertiq-983"
+
+
+    iban:
+      type: string
+      description: IBAN of an account.
+      pattern: "[A-Z]{2,2}[0-9]{2,2}[a-zA-Z0-9]{1,30}"
+      example: "FR7612345987650123456789014"
+
+
+    index:
+      type: object
+      minProperties: 1
+      properties:
+        index:
+          description: |
+            'The following codes are supported:
+             - "CPI" –customer Price Index
+             - "FC" –foreign currency
+             - "other" –for  others, not  clearly specified index relations'
+          type: string
+          maxLength: 35
+        rootIndexValue:
+          description: A number giving the basic index value in case of CPI which is the basis for the loan contract.
+          type: string
+          maxLength: 35
+        exchangeRate: 
+          $ref: "#/components/schemas/amountDependentRate"
+        additionalInformation:
+          description: 'Explanations  e.g.  on  the  "other" type.'
+          type: string
+          maxLength: 500
+
+
+    interest:
+      type: object
+      required: 
+        - rate
+      properties:
+        type:
+          description: FIXD and INDE are the only permitted codes for now.
+          type: string
+          enum: 
+            - "FIXD"
+            - "INDE"
+        relatedIndices:
+          description: List of Indices where the interest rate is related to.
+          type: array
+          items:
+            $ref: "#/components/schemas/index"
+        rate:
+          description: An array of interest rates, which might apply to different amount ranges.
+          type: array
+          items:
+            $ref: "#/components/schemas/amountDependentRate"
+        fromDateTime:
+          description: The date from which this interest rate is applicable. If no exact time is applicable, 00:00:00 is chosen as time definition.
+          type: string
+          format: date-time
+        toDateTime:
+          description: The date until this interest rate is applicable. If no exact time is applicable, 23:59:59 is chosen as time definition.
+          type: string
+          format: date-time
+        changeMechanism:
+          description: |
+            An explanation of a mandated change mechanism.
+          type: string
+          maxLength: 1024
+
+    _linksAccountDetails:
+      description: |
+        Links to the account, which can be directly used for retrieving account information from this dedicated account.
+        
+        Links to "balances" and/or "transactions"
+        
+        These links are only supported, when the corresponding consent has been already granted.
+      type: object
+      additionalProperties: 
+        $ref: "#/components/schemas/hrefType"
+      properties:
+        balances:
+          $ref: "#/components/schemas/hrefType"
+        transactions:
+          $ref: "#/components/schemas/hrefType"
+
+
+    _linksAccountReportSavingsLoans:
+      allOf:
+        - type: object
+          additionalProperties: 
+            $ref: "#/components/schemas/hrefType"
+          required:
+            - savingsAccount
+          properties:
+            savingsAccount:
+              $ref: "#/components/schemas/hrefType"
+            first:
+               $ref: "#/components/schemas/hrefType"
+            next:
+              $ref: "#/components/schemas/hrefType"
+            previous:
+              $ref: "#/components/schemas/hrefType"
+            last:
+              $ref: "#/components/schemas/hrefType"
+        - oneOf:
+          - type: object
+            required:
+              - savingsAccount
+            properties:
+              savingsAccount:
+                $ref: "#/components/schemas/hrefType"
+          - type: object
+            required:
+              - loanAccount
+            properties:
+              loanAccount:
+                $ref: "#/components/schemas/hrefType"
+
+
+    _linksAll:
+      description: |
+        A _link object with all available link types.
+      type: object
+      additionalProperties: 
+        $ref: "#/components/schemas/hrefType"
+      properties:
+        scaRedirect:
+          $ref: "#/components/schemas/hrefType"
+        scaOAuth:
+          $ref: "#/components/schemas/hrefType"
+        confirmation:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisation:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithPsuIdentification:
+          $ref: "#/components/schemas/hrefType"
+        updatePsuIdentification:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithProprietaryData:
+          $ref: "#/components/schemas/hrefType"
+        updateProprietaryData:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        updatePsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithEncryptedPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        updateEncryptedPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        updateAdditionalPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        updateAdditionalEncryptedPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithAuthenticationMethodSelection:
+          $ref: "#/components/schemas/hrefType"
+        selectAuthenticationMethod:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithTransactionAuthorisation:
+          $ref: "#/components/schemas/hrefType"
+        authoriseTransaction:
+          $ref: "#/components/schemas/hrefType"
+        self:
+          $ref: "#/components/schemas/hrefType"
+        status:
+          $ref: "#/components/schemas/hrefType"
+        scaStatus:
+          $ref: "#/components/schemas/hrefType"
+        account:
+          $ref: "#/components/schemas/hrefType"
+        savingsAccount:
+          $ref: "#/components/schemas/hrefType"
+        loanAccount:
+          $ref: "#/components/schemas/hrefType"
+        balances:
+          $ref: "#/components/schemas/hrefType"
+        transactions:
+          $ref: "#/components/schemas/hrefType"
+        transactionDetails:
+          $ref: "#/components/schemas/hrefType"
+        cardAccount:
+          $ref: "#/components/schemas/hrefType"
+        cardTransactions:
+          $ref: "#/components/schemas/hrefType"
+        first:
+          $ref: "#/components/schemas/hrefType"
+        next:
+          $ref: "#/components/schemas/hrefType"
+        previous:
+          $ref: "#/components/schemas/hrefType"
+        last:
+          $ref: "#/components/schemas/hrefType"
+        download:
+          $ref: "#/components/schemas/hrefType"
+
+
+    _linksDownload:
+      description: |
+        A list of hyperlinks to be recognised by the TPP.
+        
+        Type of links admitted in this response:
+          - "download": a link to a resource, where the transaction report might be downloaded from in 
+          case where transaction reports have a huge size.
+        
+        Remark: This feature shall only be used where camt-data is requested which has a huge size.
+
+      type: object
+      additionalProperties: 
+        $ref: "#/components/schemas/hrefType"
+      required:
+        - download
+      properties:
+        download:
+          $ref: "#/components/schemas/hrefType"
+
+
+    _linksTransactionDetails:
+      type: object
+      additionalProperties: 
+        $ref: "#/components/schemas/hrefType"
+      required:
+        - transactionDetails
+      properties:
+        transactionDetails:
+          $ref: "#/components/schemas/hrefType"
+
+
+    maskedPan:
+      description: |
+        Masked Primary Account Number.
+      type: string
+      maxLength: 35
+      example: "123456xxxxxx1234"
+
+
+    MessageCode400_AIS: 
+      description: Message codes defined for AIS for HTTP Error code 400 (BAD_REQUEST).
+      type: string
+      enum: 
+        - "FORMAT_ERROR"              #gen
+        - "PARAMETER_NOT_CONSISTENT"  #gen
+        - "PARAMETER_NOT_SUPPORTED"   #gen
+        - "SERVICE_INVALID"           #gen
+        - "RESOURCE_UNKNOWN"          #gen
+        - "RESOURCE_EXPIRED"          #gen
+        - "RESOURCE_BLOCKED"          #gen
+        - "TIMESTAMP_INVALID"         #gen
+        - "PERIOD_INVALID"            #gen
+        - "SCA_METHOD_UNKNOWN"        #gen
+        - "SCA_INVALID"               #gen
+        - "CONSENT_UNKNOWN"           #gen
+        - "SESSIONS_NOT_SUPPORTED"    #AIS
+
+
+    MessageCode401_AIS: 
+      description: Message codes defined for AIS for HTTP Error code 401 (UNAUTHORIZED).
+      type: string
+      enum: 
+        - "CERTIFICATE_INVALID"       #gen
+        - "ROLE_INVALID"              #gen
+        - "CERTIFICATE_EXPIRED"       #gen
+        - "CERTIFICATE_BLOCKED"       #gen
+        - "CERTIFICATE_REVOKE"        #gen
+        - "CERTIFICATE_MISSING"       #gen
+        - "SIGNATURE_INVALID"         #gen
+        - "SIGNATURE_MISSING"         #gen
+        - "CORPORATE_ID_INVALID"      #gen
+        - "PSU_CREDENTIALS_INVALID"   #gen
+        - "CONSENT_INVALID"           #gen, AIS
+        - "CONSENT_EXPIRED"           #gen
+        - "TOKEN_UNKNOWN"             #gen
+        - "TOKEN_INVALID"             #gen
+        - "TOKEN_EXPIRED"             #gen
+
+
+    MessageCode403_AIS: 
+      description: Message codes defined for AIS for HTTP Error code 403 (FORBIDDEN).
+      type: string
+      enum: 
+        - "CONSENT_UNKNOWN"           #gen
+        - "SERVICE_BLOCKED"           #gen
+        - "RESOURCE_UNKNOWN"          #gen
+        - "RESOURCE_EXPIRED"          #gen
+
+
+    MessageCode404_AIS: 
+      description: Message codes defined for AIS for HTTP Error code 404 (NOT FOUND).
+      type: string
+      enum: 
+        - "RESOURCE_UNKNOWN"          #gens
+
+
+    MessageCode405_AIS: 
+      description: Message codes defined for AIS for HTTP Error code 405 (METHOD NOT ALLOWED).
+      type: string
+      enum: 
+        - "SERVICE_INVALID"           #gens
+
+
+    MessageCode406_AIS: 
+      description: Message codes defined for AIS for HTTP Error code 406 (NOT ACCEPTABLE).
+      type: string
+      enum: 
+        - "REQUESTED_FORMATS_INVALID"  #AIS
+
+
+    MessageCode409_AIS: 
+      description: Message codes defined for AIS for HTTP Error code 409 (CONFLICT).
+      type: string
+      enum: 
+        - "STATUS_INVALID"            #gen
+
+
+    MessageCode429_AIS: 
+      description: Message codes for HTTP Error code 429 (TOO MANY REQUESTS).
+      type: string
+      enum: 
+        - "ACCESS_EXCEEDED"           #AIS
+
+
+    msisdn:
+      type: string
+      maxLength: 35
+      description: Mobile phone number.
+      example: "+49 170 1234567"
+
+
+    mt940: 
+      description: |
+        Data MT940 format in a text structure. 
+      type: string
+
+
+    mt942: 
+      description: |
+        Data MT942 format in a text structure.
+      type: string
+
+
+    otherType:
+      description: In cases where the specifically defined criteria (IBAN, BBAN, MSISDN)
+        are not provided to identify an instance of the respective account type (e.g. a savings account), 
+        the ASPSP shall include a proprietary ID of the respective account that uniquely identifies the account for this ASPSP.
+      type: object
+      required: 
+        - identification
+      properties:
+        identification:
+          description: Proprietary identification of the account.
+          type: string
+          maxLength: 35
+        schemeNameCode:
+          description: An entry provided by an external ISO code list. 
+          type: string
+          maxLength: 35
+        schemeNameProprietary:
+          description: A scheme name defined in a proprietary way.
+          type: string
+          maxLength: 35
+        issuer:
+          description: Issuer of the identification.
+          type: string
+          maxLength: 35
+
+
+    pan:
+      description: |
+        Primary Account Number according to ISO/IEC 7812.
+      type: string
+      maxLength: 35
+      #According to ISO the following should be valid.
+      #maxLength: 19
+      #minLength: 8
+      #pattern: "[0-9]{8,19}"
+      example: "5409050000000000"
+
+
+    purposeCode:
+      description: |
+        ExternalPurpose1Code from ISO 20022.
+        
+        Values from ISO 20022 External Code List ExternalCodeSets_1Q2018 June 2018.
+        
+      type: string
+      enum:
+        - "BKDF"
+        - "BKFE"
+        - "BKFM"
+        - "BKIP"
+        - "BKPP"
+        - "CBLK"
+        - "CDCB"
+        - "CDCD"
+        - "CDCS"
+        - "CDDP"
+        - "CDOC"
+        - "CDQC"
+        - "ETUP"
+        - "FCOL"
+        - "MTUP"
+        - "ACCT"
+        - "CASH"
+        - "COLL"
+        - "CSDB"
+        - "DEPT"
+        - "INTC"
+        - "LIMA"
+        - "NETT"
+        - "BFWD"
+        - "CCIR"
+        - "CCPC"
+        - "CCPM"
+        - "CCSM"
+        - "CRDS"
+        - "CRPR"
+        - "CRSP"
+        - "CRTL"
+        - "EQPT"
+        - "EQUS"
+        - "EXPT"
+        - "EXTD"
+        - "FIXI"
+        - "FWBC"
+        - "FWCC"
+        - "FWSB"
+        - "FWSC"
+        - "MARG"
+        - "MBSB"
+        - "MBSC"
+        - "MGCC"
+        - "MGSC"
+        - "OCCC"
+        - "OPBC"
+        - "OPCC"
+        - "OPSB"
+        - "OPSC"
+        - "OPTN"
+        - "OTCD"
+        - "REPO"
+        - "RPBC"
+        - "RPCC"
+        - "RPSB"
+        - "RPSC"
+        - "RVPO"
+        - "SBSC"
+        - "SCIE"
+        - "SCIR"
+        - "SCRP"
+        - "SHBC"
+        - "SHCC"
+        - "SHSL"
+        - "SLEB"
+        - "SLOA"
+        - "SWBC"
+        - "SWCC"
+        - "SWPT"
+        - "SWSB"
+        - "SWSC"
+        - "TBAS"
+        - "TBBC"
+        - "TBCC"
+        - "TRCP"
+        - "AGRT"
+        - "AREN"
+        - "BEXP"
+        - "BOCE"
+        - "COMC"
+        - "CPYR"
+        - "GDDS"
+        - "GDSV"
+        - "GSCB"
+        - "LICF"
+        - "MP2B"
+        - "POPE"
+        - "ROYA"
+        - "SCVE"
+        - "SERV"
+        - "SUBS"
+        - "SUPP"
+        - "TRAD"
+        - "CHAR"
+        - "COMT"
+        - "MP2P"
+        - "ECPG"
+        - "ECPR"
+        - "ECPU"
+        - "EPAY"
+        - "CLPR"
+        - "COMP"
+        - "DBTC"
+        - "GOVI"
+        - "HLRP"
+        - "HLST"
+        - "INPC"
+        - "INPR"
+        - "INSC"
+        - "INSU"
+        - "INTE"
+        - "LBRI"
+        - "LIFI"
+        - "LOAN"
+        - "LOAR"
+        - "PENO"
+        - "PPTI"
+        - "RELG"
+        - "RINP"
+        - "TRFD"
+        - "FORW"
+        - "FXNT"
+        - "ADMG"
+        - "ADVA"
+        - "BCDM"
+        - "BCFG"
+        - "BLDM"
+        - "BNET"
+        - "CBFF"
+        - "CBFR"
+        - "CCRD"
+        - "CDBL"
+        - "CFEE"
+        - "CGDD"
+        - "CORT"
+        - "COST"
+        - "CPKC"
+        - "DCRD"
+        - "DSMT"
+        - "DVPM"
+        - "EDUC"
+        - "FACT"
+        - "FAND"
+        - "FCPM"
+        - "FEES"
+        - "GOVT"
+        - "ICCP"
+        - "IDCP"
+        - "IHRP"
+        - "INSM"
+        - "IVPT"
+        - "MCDM"
+        - "MCFG"
+        - "MSVC"
+        - "NOWS"
+        - "OCDM"
+        - "OCFG"
+        - "OFEE"
+        - "OTHR"
+        - "PADD"
+        - "PTSP"
+        - "RCKE"
+        - "RCPT"
+        - "REBT"
+        - "REFU"
+        - "RENT"
+        - "REOD"
+        - "RIMB"
+        - "RPNT"
+        - "RRBN"
+        - "RVPM"
+        - "SLPI"
+        - "SPLT"
+        - "STDY"
+        - "TBAN"
+        - "TBIL"
+        - "TCSC"
+        - "TELI"
+        - "TMPG"
+        - "TPRI"
+        - "TPRP"
+        - "TRNC"
+        - "TRVC"
+        - "WEBI"
+        - "ANNI"
+        - "CAFI"
+        - "CFDI"
+        - "CMDT"
+        - "DERI"
+        - "DIVD"
+        - "FREX"
+        - "HEDG"
+        - "INVS"
+        - "PRME"
+        - "SAVG"
+        - "SECU"
+        - "SEPI"
+        - "TREA"
+        - "UNIT"
+        - "FNET"
+        - "FUTR"
+        - "ANTS"
+        - "CVCF"
+        - "DMEQ"
+        - "DNTS"
+        - "HLTC"
+        - "HLTI"
+        - "HSPC"
+        - "ICRF"
+        - "LTCF"
+        - "MAFC"
+        - "MARF"
+        - "MDCS"
+        - "VIEW"
+        - "CDEP"
+        - "SWFP"
+        - "SWPP"
+        - "SWRS"
+        - "SWUF"
+        - "ADCS"
+        - "AEMP"
+        - "ALLW"
+        - "ALMY"
+        - "BBSC"
+        - "BECH"
+        - "BENE"
+        - "BONU"
+        - "CCHD"
+        - "COMM"
+        - "CSLP"
+        - "GFRP"
+        - "GVEA"
+        - "GVEB"
+        - "GVEC"
+        - "GVED"
+        - "GWLT"
+        - "HREC"
+        - "PAYR"
+        - "PEFC"
+        - "PENS"
+        - "PRCP"
+        - "RHBS"
+        - "SALA"
+        - "SSBE"
+        - "LBIN"
+        - "LCOL"
+        - "LFEE"
+        - "LMEQ"
+        - "LMFI"
+        - "LMRK"
+        - "LREB"
+        - "LREV"
+        - "LSFL"
+        - "ESTX"
+        - "FWLV"
+        - "GSTX"
+        - "HSTX"
+        - "INTX"
+        - "NITX"
+        - "PTXP"
+        - "RDTX"
+        - "TAXS"
+        - "VATX"
+        - "WHLD"
+        - "TAXR"
+        - "B112"
+        - "BR12"
+        - "TLRF"
+        - "TLRR"
+        - "AIRB"
+        - "BUSB"
+        - "FERB"
+        - "RLWY"
+        - "TRPT"
+        - "CBTV"
+        - "ELEC"
+        - "ENRG"
+        - "GASB"
+        - "NWCH"
+        - "NWCM"
+        - "OTLC"
+        - "PHON"
+        - "UBIL"
+        - "WTER"
+
+
+    relatedDates:
+      description: Dates related to this account, e.g. start Date.
+      type: object
+      properties:
+        contractStartDate:
+          description: Start of the account contract.
+          type: string
+          format: date
+        contractEndDate:
+          description: End of the account contract.
+          type: string
+          format: date
+        contractAvailabilityDate:
+          description: Next Date where money can be taken off a savings account without loss of interest, if initiated now (in case of a savings account).
+            Next Date where a loan can be fully repaid without any extra fee.
+          type: string
+          format: date
+
+
+    remittanceInformationStructured: 
+      description: |
+        Structured remittance information.
+      type: object
+      required:
+        - reference
+      properties:
+        reference:
+          type: string
+          maxLength: 35
+        referenceType:
+          type: string
+          maxLength: 35
+        referenceIssuer:
+          type: string
+          maxLength: 35
+
+
+    reportExchangeRate:
+      description: Exchange Rate.
+      type: object
+      required:
+        - sourceCurrency
+        - exchangeRate
+        - unitCurrency
+        - targetCurrency
+        - quotationDate
+      properties:
+        sourceCurrency:
+          $ref: "#/components/schemas/currencyCode"
+        exchangeRate:
+          type: string
+        unitCurrency:
+          $ref: "#/components/schemas/currencyCode"
+        targetCurrency:
+          $ref: "#/components/schemas/currencyCode"
+        quotationDate:
+          type: string
+          format: date
+        contractIdentification:
+          type: string
+          maxLength: 35
+
+
+    standingOrderDetails:
+      description: |
+        Details of underlying standing orders.
+      type: object
+      required:
+        - startDate
+        - frequency
+      properties:
+        startDate:
+          type: string
+          format: date
+        frequency:
+          $ref: "#/components/schemas/frequencyCode"
+        endDate:
+          type: string
+          format: date
+        executionRule:
+          $ref: "#/components/schemas/executionRule"
+        withinAMonthFlag:
+          description: |
+            This element is only used in case of frequency equals "Monthly".
+            
+            If this element equals false it has no effect.
+            If this element equals true, then the execution rule is overruled if the day of execution would fall into a different month using the execution rule.
+            
+            Example: executionRule equals "preceding", dayOfExecution equals "02" and the second of a month is a Sunday. 
+            In this case, the transaction date would be on the last day of the month before.
+             This would be overruled if withinAMonthFlag equals true and the payment is processed on Monday the third of the Month.
+            Remark: This attribute is rarely supported in the market.
+          type: boolean
+
+
+    tppErrorDetail:
+      description: |
+        Detailed human readable text specific to this instance of the error. 
+        XPath might be used to point to the issue generating the error in addition.
+        Remark for Future: In future, a dedicated field might be introduced for the XPath.
+      type: string
+      maxLength: 500
+
+
+    tppErrorTitle:
+      description: |
+        Short human readable description of error type. 
+        Could be in local language. 
+        To be provided by ASPSPs.
+      type: string
+      maxLength: 70
+
+
+    tppMessage400_AIS:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode400_AIS"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+
+    tppMessage401_AIS:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode401_AIS"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+
+    tppMessage403_AIS:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode403_AIS"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+
+    tppMessage404_AIS:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode404_AIS"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+
+    tppMessage405_AIS:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode405_AIS"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+
+    tppMessage406_AIS:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode406_AIS"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+
+    tppMessage409_AIS:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode409_AIS"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+
+    tppMessage429_AIS:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode429_AIS"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+
+    tppMessageCategory:
+      description: Category of the TPP message category.
+      type: string
+      enum:
+        - "ERROR"
+        - "WARNING"
+
+
+    tppMessageText:
+      description: Additional explaining text to the TPP.
+      type: string
+      maxLength: 500
+
+
+    transactions:
+      description: Transaction details.
+      type: object
+      required:
+        - transactionAmount
+      properties:
+        transactionId:
+          description: |
+            This identification is given by the attribute transactionId of the corresponding entry of a transaction list.
+          type: string
+          example: "3dc3d5b3-7023-4848-9853-f5400a64e80f"
+        entryReference:
+          description: |
+            Is the identification of the transaction as used e.g. for reference for deltafunction on application level.
+            The same identification as for example used within camt.05x messages.
+          type: string
+          maxLength: 35
+        endToEndId:
+          description: Unique end to end identity.
+          type: string
+          maxLength: 35
+        batchIndicator:
+          description: |
+            If this indicator equals true, then the related entry is a batch entry.
+          type: boolean
+        batchNumberOfTransactions:
+          description: |
+            Shall be used if and only if the batchIndicator is contained and equals true.
+          type: integer
+        mandateId:
+          description: Identification of Mandates, e.g. a SEPA Mandate ID.
+          type: string
+          maxLength: 35
+        checkId:
+          description: Identification of a Cheque.
+          type: string
+          maxLength: 35
+        creditorId:
+          description: Identification of Creditors, e.g. a SEPA Creditor ID.
+          type: string
+          maxLength: 35
+          example: "Creditor Id 5678"
+        bookingDate:
+          description: |
+            The date when an entry is posted to an account on the ASPSPs books.
+          type: string
+          format: date
+        valueDate:
+          description: The Date at which assets become available to the account owner in case of a credit, or cease to be available to the account owner in case of a debit entry.
+            **Usage:** If entry status is pending and value date is present, then the value date refers to an expected/requested value date.
+          type: string
+          format: date
+        transactionAmount:
+          $ref: "#/components/schemas/amount"
+        currencyExchange:
+          type: array
+          items: 
+            $ref: "#/components/schemas/reportExchangeRate"
+        creditorName:
+          description: Creditor name.
+          type: string
+          maxLength: 70
+          example: "Creditor Name"
+        creditorAccount:
+          $ref: "#/components/schemas/accountReference"
+        creditorAgent:
+          $ref: "#/components/schemas/bicfi"
+        ultimateCreditor:
+          description: Ultimate creditor.
+          type: string
+          maxLength: 70
+          example: "Ultimate Creditor"
+        debtorName:
+          description: Debtor name.
+          type: string
+          maxLength: 70
+          example: "Debtor Name"
+        debtorAccount:
+          $ref: "#/components/schemas/accountReference"
+        debtorAgent:
+          $ref: "#/components/schemas/bicfi"
+        ultimateDebtor:
+          description: Ultimate debtor.
+          type: string
+          maxLength: 70
+          example: "Ultimate Debtor"
+        remittanceInformationUnstructured: 
+          type: string
+          maxLength: 140
+          example: "Ref Number Merchant"
+        remittanceInformationUnstructuredArray: 
+          type: array
+          items:
+            type: string
+            maxLength: 140
+          example: ["Ref Number Merchant", "Some Other Text"]
+        remittanceInformationStructured:
+          type: string
+          maxLength: 140
+        remittanceInformationStructuredArray:
+          type: array
+          items:
+            $ref: "#/components/schemas/remittanceInformationStructured"
+        entryDetails:
+          description: |
+            Might be used by the ASPSP to transport details about transactions within a batch.
+          type: array
+          items:
+            $ref: "#/components/schemas/EntryDetailsElement"
+        additionalInformation:
+          type: string
+          maxLength: 500
+        additionalInformationStructured:
+          description: |
+            Is used if and only if the bookingStatus entry equals "information". 
+            Every active standing order related to the dedicated payment account result into one entry.
+          type: object
+          required:
+            - standingOrderDetails
+          properties:
+            standingOrderDetails:
+              $ref: "#/components/schemas/standingOrderDetails"
+        purposeCode:
+          $ref: "#/components/schemas/purposeCode"
+        bankTransactionCode:
+          $ref: "#/components/schemas/bankTransactionCode"
+        proprietaryBankTransactionCode:
+          type: string
+          maxLength: 35
+        balanceAfterTransaction: 
+          $ref: "#/components/schemas/balance"
+        _links:
+          $ref: "#/components/schemas/_linksTransactionDetails"
+
+
+
+  parameters:
+  #####################################################
+  # Predefined Parameters
+  #####################################################
+
+
+    bookingStatusGeneric:
+      name: bookingStatus
+      in: query
+      description: |
+        Permitted codes are 
+          * "booked",
+          * "pending",  
+          * "both",
+          * "information" and
+          * "all"
+        "booked" shall be supported by the ASPSP.
+        To support the "pending" and "both" feature is optional for the ASPSP, 
+        Error code if not supported in the online banking frontend.
+        If supported, "both" means to request transaction reports of transaction of bookingStatus either "pending" or "booked".
+        To support the "information" feature is optional for the ASPSP. Currently the booking status “information” only covers standing orders. Error code if not supported.
+        To support the "all" feature is optional for the ASPSP, Error code if not supported. If supported, "all" means to request transaction reports of transaction of any bookingStatus ("pending", "booked" or "information").
+        
+      required: true
+      schema:
+        type: string
+        enum:
+          - "information"
+          - "booked"
+          - "pending"
+          - "both"
+          - "all"
+
+
+    bookingStatusSavings:
+      name: bookingStatus
+      in: query
+      description: |
+        Permitted codes are 
+          * "booked",
+          * "pending",  
+          * "both",
+        "booked" shall be supported by the ASPSP.
+        To support the "pending" and "both" feature is optional for the ASPSP, 
+        Error code if not supported in the online banking frontend.
+        If supported, "both" means to request transaction reports of transaction of bookingStatus either "pending" or "booked".
+        The "information" feature does not apply to savings accounts. Therefore, the booking status “information” is not supported on the savings endpoint. 
+        If bookingStatus="information", the response of the ASPSP shall rbe a corresponding error code (PARAMETER_NOT_SUPPORTED).
+      required: true
+      schema:
+        type: string
+        enum:
+          - "booked"
+          - "pending"
+          - "both"
+
+
+    deltaList:
+      name: deltaList
+      in: query
+      description: 
+        This data attribute is indicating that the AISP is in favour to get all transactions after the last report access 
+        for this PSU on the addressed account. 
+        This is another implementation of a delta access-report.
+        
+        This delta indicator might be rejected by the ASPSP if this function is not supported.
+        
+        Optional if supported by API provider
+      schema:
+        type: boolean
+
+
+    Digest:
+      name: Digest
+      in: header
+      description: Is contained if and only if the "Signature" element is contained in the header of the request.
+      schema:
+        type: string
+      required: false # conditional
+      example: "SHA-256=hl1/Eps8BEQW58FJhDApwJXjGY4nr1ArGDHIT25vq6A="
+
+
+    Signature:
+      name: Signature
+      in: header
+      description: |
+        A signature of the request by the TPP on application level. This might be mandated by ASPSP.
+      schema:
+        type: string
+      required: false # conditional
+      example: >
+        keyId="SN=9FA1,CA=CN=D-TRUST%20CA%202-1%202015,O=D-Trust%20GmbH,C=DE",algorithm="rsa-sha256",
+        headers="Digest X-Request-ID PSU-ID TPP-Redirect-URI Date",
+        signature="Base64(RSA-SHA256(signing string))"
+
+
+    consentId_HEADER_mandatory:
+      name: Consent-ID
+      in: header
+      description: |
+        This then contains the consentId of the related AIS consent, which was performed prior to this payment initiation.
+      required: true
+      schema:
+        description: |
+          ID of the corresponding consent object as returned by an account information consent request.
+        type: string
+
+
+    dateFrom:
+      name: dateFrom
+      in: query
+      description: |
+        Conditional: Starting date (inclusive the date dateFrom) of the transaction list, mandated if no delta access is required
+        and if bookingStatus does not equal "information".
+        
+        For booked transactions, the relevant date is the booking date. 
+        
+        For pending transactions, the relevant date is the entry date, which may not be transparent 
+        neither in this API nor other channels of the ASPSP.
+      required: false
+      schema:
+        type: string
+        format: date
+
+
+    dateTo:
+      name: dateTo
+      in: query
+      description: |
+        End date (inclusive the data dateTo) of the transaction list, default is "now" if not given. 
+        
+        Might be ignored if a delta function is used.
+        
+        For booked transactions, the relevant date is the booking date. 
+        
+        For pending transactions, the relevant date is the entry date, which may not be transparent 
+        neither in this API nor other channels of the ASPSP.
+
+      required: false
+      schema:
+        type: string
+        format: date
+
+
+    entryReferenceFrom:
+      name: entryReferenceFrom
+      in: query
+      description: |
+        This data attribute is indicating that the AISP is in favour to get all transactions after 
+        the transaction with identification entryReferenceFrom alternatively to the above defined period. 
+        This is a implementation of a delta access. 
+        If this data element is contained, the entries "dateFrom" and "dateTo" might be ignored by the ASPSP 
+        if a delta report is supported.
+        
+        Optional if supported by API provider.
+      required: false
+      schema:
+        type: string
+
+
+    loanAccountId:
+      name: loan-account-id
+      in: path
+      description: |
+        This identification is denoting the addressed loan account. 
+        The loan-account-id is retrieved by using a "readLoanAccountList".
+        The loan-account-id is the "resourceId" attribute of the loan account structure.
+        Its value is constant at least throughout the lifecycle of a given consent.
+      required: true
+      schema:
+        type: string
+        example: "3dc3d5b3-7023-4848-9853-f5400a64e81e"
+
+
+    PSU-IP-Address_conditionalForAis:
+      name: PSU-IP-Address
+      in: header
+      description: |
+        The forwarded IP Address header field consists of the corresponding HTTP request 
+        IP Address field between PSU and TPP. 
+        It shall be contained if and only if this request was actively initiated by the PSU.
+      schema:
+        type: string
+        format: ipv4
+      required: false
+      example: 192.168.8.78
+
+
+    PSU-IP-Port:
+      name: PSU-IP-Port
+      in: header
+      description: |
+        The forwarded IP Port header field consists of the corresponding HTTP request IP Port field between PSU and TPP, if available.
+      schema:
+        type: string
+      required: false
+      example: "1234"
+
+
+    PSU-Accept:
+      name: PSU-Accept
+      in: header
+      description: |
+        The forwarded IP Accept header fields consist of the corresponding HTTP request Accept header fields between PSU and TPP, if available.
+      schema:
+        type: string
+      required: false
+
+
+    PSU-Accept-Charset:
+      name: PSU-Accept-Charset
+      in: header
+      description: |
+        The forwarded IP Accept header fields consist of the corresponding HTTP request Accept header fields between PSU and TPP, if available.
+      schema:
+        type: string
+      required: false
+
+
+    PSU-Accept-Encoding:
+      name: PSU-Accept-Encoding
+      in: header
+      description: |
+        The forwarded IP Accept header fields consist of the corresponding HTTP request Accept header fields between PSU and TPP, if available.
+      schema:
+        type: string
+      required: false
+
+
+    PSU-Accept-Language:
+      name: PSU-Accept-Language
+      in: header
+      description: |
+        The forwarded IP Accept header fields consist of the corresponding HTTP request Accept header fields between PSU and TPP, if available.
+      schema:
+        type: string
+      required: false
+
+
+    PSU-User-Agent:
+      name: PSU-User-Agent
+      in: header
+      description: |
+        The forwarded Agent header field of the HTTP request between PSU and TPP, if available.
+      schema:
+        type: string
+      required: false
+
+
+    PSU-Http-Method:
+      name: PSU-Http-Method
+      in: header
+      description: |
+        HTTP method used at the PSU ? TPP interface, if available.
+        Valid values are:
+        * GET
+        * POST
+        * PUT
+        * PATCH
+        * DELETE
+      schema:
+        type: string
+        enum:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "PATCH"
+          - "DELETE"
+      required: false
+
+
+    PSU-Device-ID:
+      name: PSU-Device-ID
+      in: header
+      description: |
+        UUID (Universally Unique Identifier) for a device, which is used by the PSU, if available.
+        UUID identifies either a device or a device dependant application installation.
+        In case of an installation identification this ID needs to be unaltered until removal from device.
+      schema:
+        type: string
+        format: uuid
+      required: false
+      example: "99435c7e-ad88-49ec-a2ad-99ddcb1f5555"
+
+    PSU-Geo-Location:
+      name: PSU-Geo-Location
+      in: header
+      description: |
+        The forwarded Geo Location of the corresponding http request between PSU and TPP if available.
+      schema:
+        type: string
+        pattern: 'GEO:-?[0-9]{1,2}\.[0-9]{6};-?[0-9]{1,3}\.[0-9]{6}'
+      required: false
+      example: GEO:52.506931;13.144558
+
+    savingsAccountId:
+      name: savings-account-id
+      in: path
+      description: |
+        This identification is denoting the addressed savings account. 
+        The savings-account-id is retrieved by using a "Read SavingsAccountList".
+        The savings-account-id is the "resourceId" attribute of the savings account structure.
+        Its value is constant at least throughout the lifecycle of a given consent.
+      required: true
+      schema:
+        type: string
+        example: "3dc3d5b3-7023-4848-9853-f5400a64e81e"
+
+
+    TPP-Signature-Certificate:
+      name: TPP-Signature-Certificate
+      in: header
+      description: |
+        The certificate used for signing the request, in base64 encoding. 
+        Must be contained if a signature is contained.
+      schema:
+        type: string
+        format: byte
+      required: false # conditional
+
+
+    X-Request-ID:
+      name: X-Request-ID
+      in: header
+      description: ID of the request, unique to the call, as determined by the initiating party.
+      required: true
+      example: "99391c7e-ad88-49ec-a2ad-99ddcb1f7721"
+      schema:
+        type: string
+        format: uuid
+
+
+  headers:
+  #####################################################
+  # Reusable Response Header Elements
+  #####################################################
+  
+    Location:
+      description: |
+        Location of the created resource.
+      schema:
+        type: string
+        format: url
+      required: false
+      
+  
+    X-Request-ID:
+      description: ID of the request, unique to the call, as determined by the initiating party.
+      required: true
+      example: "99391c7e-ad88-49ec-a2ad-99ddcb1f7721"
+      schema:
+        type: string
+        format: uuid
+
+
+  responses:
+  #####################################################
+  # Reusabale Responses
+  #####################################################
+    #####################################################
+    # Positive Responses
+    #####################################################
+      
+
+
+    OK_200_LoanAccountBalances:
+      description: OK
+      
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - balances
+            properties:
+              loanAccount:
+                $ref: "#/components/schemas/accountReference"
+              balances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/balance"
+
+          examples:
+            "Example 1: Regular Account":
+              $ref: "#/components/examples/loanAccountBalancesExample"
+
+
+    OK_200_LoanAccountDetails:
+      description: OK
+      
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - loanAccount
+            properties:
+              loanAccount:
+                $ref: "#/components/schemas/accountDetailsSavingsLoans"
+          example:
+            $ref: "#/components/examples/loanAccountDetailsExample"
+
+
+    OK_200_LoanAccountList:
+      description: OK
+      
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            description: |
+              List of loan accounts with details.
+            type: object
+            required:
+              - loanAccounts
+            properties:
+              loanAccounts:
+                type: array
+                items:
+                  $ref: "#/components/schemas/accountDetailsSavingsLoans"
+          example:
+            $ref: "#/components/examples/loanAccountListExample"
+
+
+    OK_200_LoanAccountsTransactions:
+      description: OK
+      
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            description: |
+              Body of the JSON response for a successful read transaction list request.
+              This account report contains transactions resulting from the query parameters.
+            type: object
+            properties:
+              loanAccount:
+                $ref: "#/components/schemas/accountReference"
+              transactions:
+                $ref: "#/components/schemas/accountReport"
+              balances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/balance"
+              _links:
+                $ref: "#/components/schemas/_linksDownload"
+
+          examples:
+            "Example 1":
+              $ref: "#/components/examples/loanAccountTransactionsExample"
+        
+        application/xml:
+          schema:
+            description: 
+              Body of the XML response for a successful read transaction list request.
+              
+              The body has the structure of a either a camt.052 or camt.053 message.
+              
+              The camt.052 may include pending payments which are not yet finally booked. 
+              The ASPSP will decide on the format due to the chosen parameters, 
+              specifically on the chosen dates relative to the time of the request. 
+              In addition the ASPSP might offer camt.054x structure e.g. in a corporate setting.
+            oneOf: #Different camt messages
+              - $ref: "#/components/schemas/camt.052"
+              - $ref: "#/components/schemas/camt.053"
+              - $ref: "#/components/schemas/camt.054"
+        
+        text/plain:
+          schema:
+            description:
+              Body of the Text response for a successful read transaction list request.
+              
+              The body has the structure of a MT94x message.
+              
+              The response body consists of an MT940 or MT942 format in a text structure. 
+              The MT942 may include pending payments which are not yet finally booked. 
+              The ASPSP will decide on the format due to the chosen parameters, 
+              specifically on the chosen dates relative to the time of the request.
+            oneOf: #Different MT94x
+              - $ref: "#/components/schemas/mt940"
+              - $ref: "#/components/schemas/mt942"
+
+
+    OK_200_SavingsAccountBalances:
+      description: OK
+      
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - balances
+            properties:
+              savingsAccount:
+                $ref: "#/components/schemas/accountReference"
+              balances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/balance"
+
+          examples:
+            "Example 1: Regular Account":
+              $ref: "#/components/examples/savingsAccountBalancesExample"
+
+
+    OK_200_SavingsAccountDetails:
+      description: OK
+      
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - savingsAccount
+            properties:
+              savingsAccount:
+                $ref: "#/components/schemas/accountDetailsSavingsLoans"
+          example:
+            $ref: "#/components/examples/savingsAccountDetailsExample"
+
+
+    OK_200_SavingsAccountList:
+      description: OK
+      
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            description: |
+              List of savings accounts with details.
+            type: object
+            required:
+              - savingsAccounts
+            properties:
+              savingsAccounts:
+                type: array
+                items:
+                  $ref: "#/components/schemas/accountDetailsSavingsLoans"
+          example:
+            $ref: "#/components/examples/savingsAccountListExample"
+
+
+    OK_200_SavingsAccountsTransactions:
+      description: OK
+      
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            description: |
+              Body of the JSON response for a successful read transaction list request.
+              This account report contains transactions resulting from the query parameters.
+            type: object
+            properties:
+              savingsAccount:
+                $ref: "#/components/schemas/accountReference"
+              transactions:
+                $ref: "#/components/schemas/accountReport"
+              balances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/balance"
+              _links:
+                $ref: "#/components/schemas/_linksDownload"
+
+          examples:
+            "Example 1":
+              $ref: "#/components/examples/savingsAccountTransactionsExample"
+        
+        application/xml:
+          schema:
+            description: 
+              Body of the XML response for a successful read transaction list request.
+              
+              The body has the structure of a either a camt.052 or camt.053 message.
+              
+              The camt.052 may include pending payments which are not yet finally booked. 
+              The ASPSP will decide on the format due to the chosen parameters, 
+              specifically on the chosen dates relative to the time of the request. 
+              In addition the ASPSP might offer camt.054x structure e.g. in a corporate setting.
+            oneOf: #Different camt messages
+              - $ref: "#/components/schemas/camt.052"
+              - $ref: "#/components/schemas/camt.053"
+              - $ref: "#/components/schemas/camt.054"
+        
+        text/plain:
+          schema:
+            description:
+              Body of the Text response for a successful read transaction list request.
+              
+              The body has the structure of a MT94x message.
+              
+              The response body consists of an MT940 or MT942 format in a text structure. 
+              The MT942 may include pending payments which are not yet finally booked. 
+              The ASPSP will decide on the format due to the chosen parameters, 
+              specifically on the chosen dates relative to the time of the request.
+            oneOf: #Different MT94x
+              - $ref: "#/components/schemas/mt940"
+              - $ref: "#/components/schemas/mt942"
+
+
+    #####################################################
+    # Negative Responses
+    #####################################################
+
+    BAD_REQUEST_400_AIS:
+      description: Bad Request
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error400_NG_AIS" 
+
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Error400_AIS" 
+
+
+    CONFLICT_409_AIS: 
+      description: Conflict
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      content:
+        application/json:
+          schema:
+             $ref: "#/components/schemas/Error409_NG_AIS"
+          
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error409_AIS"
+
+
+    FORBIDDEN_403_AIS:
+      description: Forbidden
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error403_NG_AIS" 
+
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error403_AIS" 
+
+
+    INTERNAL_SERVER_ERROR_500_AIS:
+      description: Internal Server Error
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      #No Response body because there are no valid message codes for AIS in case of HTTP code 500 
+
+
+    METHOD_NOT_ALLOWED_405_AIS:
+      description: Method Not Allowed
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error405_NG_AIS" 
+
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error405_AIS" 
+
+
+    NOT_ACCEPTABLE_406_AIS:
+      description: Not Acceptable
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error406_NG_AIS" 
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error406_AIS" 
+
+
+    NOT_FOUND_404_AIS:
+      description: Not found
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error404_NG_AIS" 
+
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error404_AIS" 
+
+
+    REQUEST_TIMEOUT_408_AIS: 
+      description: Request Timeout
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      #No Response body because there are no valid message codes for AIS in case of HTTP code 408
+
+
+    SERVICE_UNAVAILABLE_503_AIS:
+      description: Service Unavailable
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      #No Response body because there are no valid message codes for AIS in case of HTTP code 503
+
+
+    TOO_MANY_REQUESTS_429_AIS:
+      description: Too Many Requests
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error429_NG_AIS" 
+        application/problem+json:
+
+          schema:
+             $ref: "#/components/schemas/Error429_AIS" 
+
+
+    UNAUTHORIZED_401_AIS:
+      description: Unauthorized
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error401_NG_AIS" 
+
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error401_AIS" 
+            
+
+
+    UNSUPPORTED_MEDIA_TYPE_415_AIS:
+      description: Unsupported Media Type
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      #No Response body because there are no valid message codes for AIS in case of HTTP code 415 
+
+
+
+  examples:
+  #####################################################
+  # Predefined Examples
+  #####################################################
+
+
+#    interestRateFixed:
+#      description: 'If the interest rate is fixedat 1.5% for a period of five years (2021-01-01 to 2025-12-31), 
+#        the "interest" object shall at least include exactly one itemof the following form:'
+#      value:
+#        {"interest":[{"type": "FIXD" ,"rate": [{"percentage": "1.5"}],"toDateTime": "2025-12-31T23:59:59"}]}
+
+
+#    interestRateAnnualIncrease:
+#      description: 'If the interest rate is set at 1% for the first year and increasing by 0.2 percentage points per year for 
+#        a period of five years (2021-01-01 to 2022-12-31), the "interest" object should include items of the following form.
+#        Remark: Delivery of historic interest rates is not required.'
+#      value:
+#        {"interest":[
+#            {"type": "FIXD" ,"rate": [{"percentage": "1.0"}],"toDateTime": "2021-12-31T23:59:59"},
+#            {"type": "FIXD" ,"rate": [{"percentage": "1.2"}],"fromDateTime": "2022-01-01T00:00:00","toDateTime": "2022-12-31T23:59:59"}
+#          ]
+#        }
+
+
+#    interestRatefixedPlusPrime:
+#      description: If the interest rate is set at 1.0% plus the ECB's interest rate on the main refinancing operations("Prime Rate") 
+#        'for a period of five years (2021-01-01 to 2025-12-31), the "interest" object shall at least include items of the following form:'
+#      value:
+#        {"interest":[
+#            {"type": "FIXD" ,"rate": [{"percentage": "1.0"}],"toDateTime": "2025-12-31T23:59:59"},
+#            {"type": "INDE" ,"relatedIndices": [{"index": "other","additionalInformation": "ECB MRO Interest Rate"}],"rate": [{"percentage": "0.0"}]}
+#          ]
+#        }
+
+
+#    interestRatefixedPlusInflation:
+#      description: 'Assuming the interest rate is set at 1.0% plus inflation rate measured by the change of the consumer price index (CPI).  
+#        If  the  CPI was 120 on 2021-01-01 (reference date for CPI changes) and changed to 120,1 for March 2021 (published in 2021-04-01), 
+#        the "interest" object for a response from April 2021 should contain the following items'
+#      value:
+#        {"interest": [
+#            {"type": "FIXD" ,"rate": [{"percentage": "1.0"}],"toDateTime": "2025-12-31T23:59:59"},
+#            {"type": "INDE" ,"relatedIndices": [{"index": "CPI","rootIndexValue": "120"}], "rate": [{"percentage": "0.08"}], "fromDateTime": "2021-03-018T00:00:00+02:00"}
+#          ]
+#        }
+
+    loanAccountBalancesExample:
+      summary: Loan Account Balances Example
+      description: Generic response to a /readLoanAccountBalances request.
+      value:
+        {
+          "loanAccount": {"iban": "DE2310010010123456788"},
+          "balances": [
+            {"balanceAmount": {"currency": "EUR", "amount": "-80000.00"},"balanceType": "closingBooked","referenceDate": "2020-10-01"},
+            {"balanceAmount": {"currency": "EUR","amount": "-82500.00"},"balanceType": "expected","lastChangeDateTime": "2020-11-20T15:30:35.035Z"}
+          ]
+        }
+
+
+    loanAccountDetailsExample:
+      summary: Loan Account Details Example
+      description: Generic response to a /readLoanAccountDetails request.
+      value:
+        {"loanAccount": {
+          "resourceId": "3dc3d5b3-7023-4848-9853-f5400a64e81a",
+          "iban": "DE2310010010123456788",
+          "currency": "EUR",
+          "ownerName": "Paul Simpson",
+          "name": " Silver",
+          "product": "Retail loan",
+          "cashAccountType": "LOAN",
+          "status": "enabled",
+          "interest": [{"type": "FIXD" ,"rate": [{"percentage": "4.5"}],"toDateTime": "2021-01-05T23:59:59"}],
+          "relatedDates": {"contractStartDate": "2017-01-01","contractEndDate":"2023-01-01","contractAvailabilityDate" : "2020-01-01"},
+          "collateralsInvolved": false,
+          "balances": [{"balanceAmount": {"currency": "EUR", "amount": "-80000.00"},"balanceType": "closingBooked","referenceDate": "2020-10-01"}],
+          "_links": {
+            "balances": {"href": "/v1/loans/3dc3d5b3-7023-4848-9853-f5400a64e81a/balances" },
+            "transactions": {"href": "/v1/loans/3dc3d5b3-7023-4848-9853-f5400a64e81a/transactions" }
+          }
+        }}
+
+
+    loanAccountListExample:
+      summary: Loan Account List Example
+      description: Response in case of an example, where the consent has been given on two different Accounts.
+      value:
+        {
+          "loanAccounts": [
+            {
+              "resourceId": "3dc3d5b3-7023-4848-9853-f5400a64e81a",
+              "other": {"identification": "MyProprietaryID-0003"},
+              "currency": "EUR",
+              "ownerName": "Paul Simpson",
+              "name": " Silver",
+              "product": "Retail loan",
+              "cashAccountType": "LOAN",
+              "interest": [
+                {"type": "FIXD" ,"rate": [{"percentage": "4.5"}],"toDateTime": "2021-01-05T23:59:59"}
+              ],
+              "relatedDates": {"contractStartDate": "2017-01-01","contractEndDate":"2023-01-01","contractAvailabilityDate" : "2020-01-01"},
+              "collateralsInvolved": false,
+              "balances": [{"balanceAmount": {"currency": "EUR", "amount": "-80000.00"},"balanceType": "closingBooked","referenceDate": "2020-10-30"}],
+              "_links": {
+                "balances": {"href": "/v1/loans/3dc3d5b3-7023-4848-9853-f5400a64e81a/balances" },
+                "transactions": {"href": "/v1/loans/3dc3d5b3-7023-4848-9853-f5400a64e81a/transactions" }
+              }
+            },
+            {
+              "resourceId": "3dc3d5b3-7023-4848-9853-f5400a64e816",
+              "other": {"identification": "MyProprietaryID-0004"},
+              "currency": "EUR",
+              "ownerName": "Paul Simpson",
+              "name": " Silver",
+              "product": "Retail loan",
+              "cashAccountType": "LOAN",
+              "interest": [
+                {"type": "FIXD" ,"rate": [{"percentage": "4.5"}],"toDateTime": "2021-01-05T23:59:59"}
+              ],
+              "relatedDates": {"contractStartDate": "2017-01-01","contractEndDate":"2023-01-01","contractAvailabilityDate" : "2020-01-01"},
+              "collateralsInvolved": false,
+              "balances": [{"balanceAmount": {"currency": "USD", "amount":"-10000.00"},"balanceType": "closingBooked","referenceDate": "2020-10-30"}],
+              "_links": {
+                "balances": {"href": "/v1/loans/3dc3d5b3-7023-4848-9853-f5400a64e816/balances" },
+                "transactions": {"href": "/v1/loans/3dc3d5b3-7023-4848-9853-f5400a64e816/transactions" }
+              }
+            },
+            {
+              "resourceId": "3dc3d5b3-10a4-4848-9853-f5400a64e81g",
+              "iban": "DE40100100103307118608",
+              "currency": "EUR",
+              "ownerName": "Paul Simpson",
+              "name": " Happy Home 2008",
+              "product": "Mortgage loan",
+              "cashAccountType": "LOAN",
+              "interest": [
+                {"type": "FIXD", "rate": [{"percentage": "2.0"}], "toDateTime": "2039-12-31T23:59:59"}
+              ],
+              "relatedDates": {"contractStartDate": "2020-01-01","contractEndDate":"2040-01-01","contractAvailabilityDate" : "2030-01-01"},
+              "collateralsInvolved": false,
+              "balances": [{"balanceAmount": {"currency": "EUR", "amount": "-100000.00"},"balanceType": "closingBooked","referenceDate": "2020-10-01"}],
+              "_links": {
+                "balances": {"href": "/v1/loans/3dc3d5b3-10a4-4848-9853-f5400a64e81g/balances" },
+                "transactions": {"href": "/v1/loans/3dc3d5b3-10a4-4848-9853-f5400a64e81g/transactions" }
+              }
+            }
+          ]
+        }
+
+
+    loanAccountTransactionsExample:
+      summary: Savings Account Transactions Example
+      description: Generic response to a /readSavingsAccountTransactionss request.
+      value:
+        {
+          "loanAccount": {"iban": "DE2310010010123456788" },
+          "transactions": {
+            "booked":[
+              {
+                "transactionId": "1234567",
+                "transactionAmount": {"currency": "EUR", "amount":"1250"},
+                "bookingDate": "2020-08-30",
+                "valueDate": "2020-08-31", 
+                "remittanceInformationUnstructured": "Amortization Aug 2020" 
+              },
+              {
+                "transactionId": "1234568",
+                "transactionAmount": {"currency": "EUR", "amount":"1250"},
+                "bookingDate": "2020-09-29",
+                "valueDate": "2020-09-30", 
+                "remittanceInformationUnstructured": "Amortization Sep 2020" 
+              },
+              {
+                "transactionId": "1234569",
+                "transactionAmount": {"currency": "EUR", "amount": "-10.00"},
+                "bookingDate": "2020-09-30",
+                "valueDate": "2020-09-30", 
+                "remittanceInformationUnstructured": "Interest Q3 2020" 
+              }
+            ],
+            "pending": [
+              {
+                "transactionId": "1234569",
+                "transactionAmount": {"currency": "EUR", "amount": ”1250"},
+                "valueDate": "2020-10-31", 
+                "remittanceInformationUnstructured": "Amortization Oct 2020" 
+              }
+            ]
+          }
+        }
+
+
+    savingsAccountBalancesExample:
+      summary: Savings Account Balances Example
+      description: Generic response to a /readSavingsAccountBalances request.
+      value:
+        {
+          "savingsAccount": {"iban": "DE2310010010123456788"},
+          "balances": [
+            {"balanceAmount": {"currency": "EUR", "amount": "5000.00"},"balanceType": "closingBooked","referenceDate": "2020-10-20"}
+          ]
+        }
+        
+        
+    savingsAccountDetailsExample:
+      summary: Savings Account Details Example
+      description: Generic response to a /readSavingsAccountDetails request.
+      value:
+        {"savingsAccount": {
+          "resourceId": "3dc3d5b3-7023-4848-9853-f5400a64e81a",
+          "iban": "DE2310010010123456788", 
+          "currency": "EUR",
+          "ownerName": "Paul Simpson",
+          "name": "Savings 1",
+          "product": "Saving Account",
+          "cashAccountType": "SVGS",
+          "status": "enabled",
+          "interest": [
+            {
+              "type": "FIXD" ,
+              "rate": [
+                {"percentage": "1.5", "fromAmount": {"currency": "EUR", "amount": "0.0"}, "toAmount": {"currency": "EUR", "amount": "2000"}},
+                {"percentage": "0.1", "fromAmount": {"currency": "EUR", "amount": "2000"}}
+              ],
+              "toDateTime": "2017-01-05T23:59:59"},
+            {
+              "type": "FIXD" ,
+              "rate": [
+                {"percentage": "0.5", "fromAmount": {"currency": "EUR", "amount": "0.0"}, "toAmount": {"currency": "EUR", "amount": "2000"}},
+                {"percentage": "0.1", "fromAmount": {"currency": "EUR", "amount": "2000"}}
+              ],
+              "fromDateTime": "2017-01-06T00:00:00"
+            }
+          ],
+          "relatedDates": {"contractStartDate": "2016-01-01","contractEndDate": "2026-01-01","contractAvailabilityDate" : "2019-01-01"},
+          "balances": [{"balanceAmount": {"currency": "EUR", "amount": "5000.00"},"balanceType": "closingBooked","referenceDate": "2020-10-01"}],
+          "_links": {
+            "balances": {"href": "/v1/savings/3dc3d5b3-7023-4848-9853-f5400a64e81a/balances" },
+            "transactions": {"href": "/v1/savings/3dc3d5b3-7023-4848-9853-f5400a64e81a/transactions" }
+          }}
+        }
+
+
+    savingsAccountListExample:
+      summary: Savings Account List Example
+      description: Response in case of an example, where the consent has been given on two different Accounts.
+      value:
+        {"savingsAccounts":
+          [
+            {
+              "resourceId": "3dc3d5b3-7023-4848-9853-f5400a64e81a",
+              "other": {"identification": "MyProprietaryID-0001"},
+              "currency": "EUR",
+              "ownerName": "Paul Simpson",
+              "name": "Savings 1a",
+              "product": "Saving Account",
+              "cashAccountType": "SVGS",
+              "interest":
+                [
+                  {"type": "FIXD" ,
+                   "rate": 
+                     [
+                       {"percentage": "1.5",   #mandatory
+                        "fromAmount": {"currency": "EUR", "amount": "0.0"}, 
+                        "toAmount": {"currency": "EUR", "amount": "2000"}
+                       },
+                       {"percentage": "0.1",   #mandatory"
+                        "fromAmount": {"currency": "EUR", "amount": "2000"}
+                       }
+                     ],
+                     "toDateTime": "2017-01-05T23:59:59"
+                  },
+                  {"type": "FIXD" ,
+                   "rate": [
+                     {"percentage": "0.5", "fromAmount": {"currency": "EUR", "amount": "0.0"}, "toAmount": {"currency": "EUR", "amount": "2000"}},
+                     {"percentage": "0.1", "fromAmount": {"currency": "EUR", "amount": "2000"}}],"fromDateTime": "2017-01-06T00:00:00"}
+                ],
+              "relatedDates": {"contractStartDate": "2016-01-01","contractEndDate": "2026-01-01","contractAvailabilityDate" : "2019-01-01"},
+              "balances": [{"balanceAmount": {"currency": "EUR", "amount": "5000.00"}, "balanceType": "closingBooked","referenceDate": "2020-10-01"}],
+              "_links": {
+                "balances": {"href": "/v1/savings/3dc3d5b3-7023-4848-9853-f5400a64e81a/balances" },
+                "transactions": {"href": "/v1/savings/3dc3d5b3-7023-4848-9853-f5400a64e81a/transactions" }
+              }
+            },
+            {
+              "resourceId": "3dc3d5b3-7023-4848-9853-f5400a64e813",
+              "other": {"identification": "MyProprietaryID-0002"},
+              "currency": "EUR",
+              "ownerName": "Paul Simpson",
+              "name": "Savings 1b",
+              "product": "Saving Account",
+              "cashAccountType": "SVGS",
+              "interest":
+                [
+                  {"type": "FIXD" ,
+                   "rate": [
+                      {"percentage": "1.5", "fromAmount": {"currency": "EUR", "amount": "0.0"}, "toAmount": {"currency": "EUR", "amount": "2000"}},
+                      {"percentage": "0.1", "fromAmount": {"currency": "EUR", "amount": "2000"}}
+                    ],
+                   "toDateTime": "2017-01-05T23:59:59"
+                  },
+                  {"type": "FIXD" ,
+                   "rate": [
+                       {"percentage": "0.5", "fromAmount": {"currency": "EUR", "amount": "0.0"}, "toAmount": {"currency": "EUR", "amount": "2000"}},
+                       {"percentage": "0.1", "fromAmount": {"currency": "EUR", "amount": "2000"}}
+                     ],
+                   "fromDateTime": "2017-01-06T00:00:00"}
+                ],
+              "relatedDates": {"contractStartDate": "2016-01-01","contractEndDate": "2026-01-01","contractAvailabilityDate" : "2019-01-01"},
+              "balances": [{"balanceAmount": {"currency": "EUR", "amount": 4000.00"},"balanceType": "closingBooked","referenceDate": "2020-10-01"}],
+              "_links": {
+                "balances": {"href": "/v1/savings/3dc3d5b3-7023-4848-9853-f5400a64e813/balances" },
+                "transactions": {"href": "/v1/savings/3dc3d5b3-7023-4848-9853-f5400a64e813/transactions" }
+              }
+            }
+          ]
+        }
+
+
+    savingsAccountTransactionsExample:
+      summary: Savings Account Transactions Example
+      description: Generic response to a /readSavingsAccountTransactionss request.
+      value:
+        {
+          "savingsAccount": {"iban": "DE2310010010123456788"},
+          "transactions": {
+            "booked":[
+              {
+                "transactionId": "1234567",
+                "transactionAmount": {"currency": "EUR", "amount": "2000"},
+                "bookingDate": "2020-10-01",
+                "valueDate": "2020-10-02", 
+                "remittanceInformationUnstructured": "Example 1"
+              },
+              {
+                "transactionId": "1234568",
+                "transactionAmount": {"currency": "EUR", "amount": "2000"},
+                "bookingDate": "2020-10-09",
+                "valueDate": "2020-10-10", 
+                "remittanceInformationUnstructured": "Example 2"
+              }
+            ],
+            "pending": [
+              {
+                "transactionId": "1234570",
+                "transactionAmount": {"currency": "EUR", "amount": "2000"},
+                "valueDate": "2020-10-30", 
+                "remittanceInformationUnstructured": "Example3"
+              }
+            ]
+          }
+        }
+        
+  

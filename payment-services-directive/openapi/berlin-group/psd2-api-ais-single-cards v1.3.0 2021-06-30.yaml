@@ -1,0 +1,2399 @@
+openapi: 3.0.1
+info:
+  title: NextGenPSD2 XS2A Framework Implementation Guidelines Extended Services AIS for Single Cards
+  version: "1.3.0_2021-06-30"
+  description: |
+    # Summary
+    As before, specific card reconciliation accounts (called "card accounts" in [XS2A-IG]) can be addressed in a consent request by 
+    identifying the card account by its corresponding masked PAN. Please note that the card accounts are providing card information in an 
+    accumulated way.
+    In addition, this specification adds to this consent model, that a masked PAN is addressing a single card.
+    It is up to the ASPSP if this consent grants access
+      - to the single card identified by the masked PAN,
+      - the card account identified by the masked PAN or
+      - both,
+    delivering these information on the related endpoints /card-accounts or /cards. The ASPSP's respective decision must be documented by 
+    the ASPSP.
+    Additionally, a card account or single cards can be addressed by an Account Access Object containing an identifier of the 
+    reconciliation account accompanied by the specification of the cashAccountType to Type "CARD" (see Section 6.3). A consent of this 
+    type will grant the respective access to both,
+      - all cards reconciled through this account and
+      - the related card account,
+    if the ASPSP supports the corresponding endpoints at all.
+    As a third / fourth way to establish a card specific consent, the TPP can request a bank-offered consent or a global consent but 
+    restricting the requested access to a certain cashAccountType - e.g. CARD. A consent of this type will grant the respective access 
+    to both
+      - cards and
+      - card accounts,
+    if the ASPSP supports the related endpoints at all.
+    
+  license:
+    name: Creative Commons Attribution 4.0 International Public License
+    url: https://creativecommons.org/licenses/by/4.0/
+  #termsOfService: URL for Terms of Service of the API
+  contact:
+    name: The Berlin Group - A European Standards Initiative
+    url: https://www.berlin-group.org/
+    email: info@berlin-group.org
+    
+externalDocs:
+  description: |
+    Full Documentation of NextGenPSD2 Access to Account Interoperability Framework
+    (General Introduction Paper, Operational Rules, Implementation Guidelines)
+  url: https://www.berlin-group.org/nextgenpsd2-downloads
+
+servers:
+  - url: https://api.tpp.com/psd2
+    description: TPP server
+
+paths:
+  /v1/cards:
+    get:
+      summary: Read list of cards.
+      description: | 
+        Reads a list of cards potentially with additional information, e.g. balance information. 
+        It is assumed that a consent of the PSU to this access is already given and stored on the ASPSP system. 
+        The addressed list of cards depends then on the stored consent addressed by consentId, respectively the OAuth2 access token.
+        
+      operationId: readListOfCards
+      tags:
+        - cards
+        - list
+      
+      security:
+      ##################################################### 
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      #In this file only the basic security element to transport
+      # the bearer token of an an OAuth2 process, which has to 
+      # be included inthe HTTP header ist described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation, 
+      # it is recommandes to adjust the security schemes according to 
+      # your system enviroments and security policies.
+      #####################################################
+        - {}
+        # - BearerAuthOAuth: []
+      
+      parameters:
+        #path # NO PATH PARAMETER
+        #query # NO QUERY PARAMETER
+        #header
+        #mandatory header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+        #optional header parameters
+        - $ref: "#/components/parameters/PSU-IP-Address_optional"   
+        - $ref: "#/components/parameters/Authorization"              
+   
+      # no request body
+      # requestBody:
+    
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_CARDS"
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415"   
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503"
+
+
+  /v1/cards/{card-id}:
+    get:
+      summary: Read card details.
+      description: | 
+        Reads details about a card. It is assumed that a consent of the PSU to this access is already given and stored on the ASPSP system. 
+        The addressed details of this account depends then on the stored consent addressed by consentId, respectively the OAuth2 access 
+        token.
+        
+      operationId: readCardDetails
+      tags:
+        - cards
+        - details
+      
+      security:
+      ##################################################### 
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      #In this file only the basic security element to transport
+      # the bearer token of an an OAuth2 process, which has to 
+      # be included inthe HTTP header ist described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation, 
+      # it is recommandes to adjust the security schemes according to 
+      # your system enviroments and security policies.
+      #####################################################
+        - {}
+        # - BearerAuthOAuth: []
+      
+      parameters:
+        #path 
+        - $ref: "#/components/parameters/cardId_PATH"
+        #query # NO QUERY PARAMETER
+        #header
+        #mandatory header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+        #optional header parameters
+        - $ref: "#/components/parameters/PSU-IP-Address_optional"   
+        - $ref: "#/components/parameters/Authorization"              
+   
+      # no request body
+      # requestBody:
+    
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_CARDDETAILS"        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415"   
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503"
+
+  /v1/cards/{card-id}/balances:
+    get:
+      summary: Read card balances.
+      description: | 
+         Read detailed balance information about the addressed card by "card-id". 
+         For a given card, an optional parameter "dateFrom" defines the begin of a period from which to obtain available balance related information.
+         Please note, that the current credit line of a given card might be 
+         tighter than what a response to this request will suggest due to general credit limits on the card account and transactions by 
+         other cards to the same card account.
+        
+      operationId: readCardBalances
+      tags:
+        - cards
+        - balances
+      
+      security:
+      ##################################################### 
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      #In this file only the basic security element to transport
+      # the bearer token of an an OAuth2 process, which has to 
+      # be included inthe HTTP header ist described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation, 
+      # it is recommandes to adjust the security schemes according to 
+      # your system enviroments and security policies.
+      #####################################################
+        - {}
+        # - BearerAuthOAuth: []
+      
+      parameters:
+        #path 
+        - $ref: "#/components/parameters/cardId_PATH"
+        #query 
+        - $ref: "#/components/parameters/dateFrom"
+        #header
+        #mandatory header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+        #optional header parameters
+        - $ref: "#/components/parameters/PSU-IP-Address_optional"   
+        - $ref: "#/components/parameters/Authorization"              
+   
+      # no request body
+      # requestBody:
+    
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_CARDBALANCES"        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415"   
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503"
+
+  /v1/cards/{card-id}/transactions:
+    get:
+      summary: Read account data.
+      description: | 
+        Reads account data from a given card addressed by "card-id".
+        
+      operationId: readAccountData
+      tags:
+        - cards
+        - account data
+        - transactions
+      
+      security:
+      ##################################################### 
+      # REMARKS ON SECURITY IN THIS OPENAPI FILE
+      #In this file only the basic security element to transport
+      # the bearer token of an an OAuth2 process, which has to 
+      # be included inthe HTTP header ist described.
+      #
+      # WARNING:
+      # If you want to use this file for a productive implementation, 
+      # it is recommandes to adjust the security schemes according to 
+      # your system enviroments and security policies.
+      #####################################################
+        - {}
+        # - BearerAuthOAuth: []
+      
+      parameters:
+        #path 
+        - $ref: "#/components/parameters/cardId_PATH"
+        #query
+        - $ref: "#/components/parameters/dateFrom"
+        - $ref: "#/components/parameters/dateTo"
+        - $ref: "#/components/parameters/bookingStatusCard"
+        - $ref: "#/components/parameters/deltaList"
+        #header
+        #mandatory header parameter
+        - $ref: "#/components/parameters/X-Request-ID"
+        - $ref: "#/components/parameters/consentId_HEADER_mandatory"
+        #optional header parameters
+        - $ref: "#/components/parameters/PSU-IP-Address_optional"   
+        - $ref: "#/components/parameters/Authorization"              
+   
+      # no request body
+      # requestBody:
+    
+      responses:
+        '200':
+          $ref: "#/components/responses/OK_200_CARDTRANSACTIONS"        
+        '400':
+          $ref: "#/components/responses/BAD_REQUEST_400"
+        '401':
+          $ref: "#/components/responses/UNAUTHORIZED_401"
+        '403':
+          $ref: "#/components/responses/FORBIDDEN_403"
+        '404':
+          $ref: "#/components/responses/NOT_FOUND_404"
+        '405':
+          $ref: "#/components/responses/METHOD_NOT_ALLOWED_405"
+        '408':
+          $ref: "#/components/responses/REQUEST_TIMEOUT_408"
+        '415':
+          $ref: "#/components/responses/UNSUPPORTED_MEDIA_TYPE_415"   
+        '500':
+          $ref: "#/components/responses/INTERNAL_SERVER_ERROR_500"
+        '503':
+          $ref: "#/components/responses/SERVICE_UNAVAILABLE_503"
+
+components:
+#####################################################
+# Predefined Components
+#####################################################
+
+  schemas:
+  #####################################################
+  # Predefined Schemas
+  #####################################################
+
+    consentId:
+      description: |
+        This shall be contained if the push notification is about establishing a consent
+      type: string
+      
+    authorization:
+      description: |
+        Authorization by OAuth2 based Protocol.
+      type: string
+
+    readCardListResponse-200_json:
+      description: Descriptions of the accessible cards.
+      type: object
+      required:
+        - cards
+      properties:
+        cards:
+          type: array
+          items: 
+            $ref: "#/components/schemas/cardAccountDetails"
+    
+    readCardDetailsResponse-200_json:
+      description: Details of the card.
+      type: object
+      required:
+        - card
+      properties:
+        card:
+          $ref: "#/components/schemas/cardAccountDetails"
+
+    readCardBalancesResponse-200_json:
+      description: Balances of the cards.
+      type: object
+      required:
+        - balances
+      properties:
+        card:
+          $ref: "#/components/schemas/accountReference"
+        debitAccounting:
+          $ref: "#/components/schemas/debitAccounting"
+        balances:
+          $ref: "#/components/schemas/balanceList"
+          
+    readCardTransactionsResponse-200_json:
+      description: Transactions of the cards.
+      type: object
+      properties:
+        card:
+          $ref: "#/components/schemas/accountReference"
+        debitAccounting:
+          $ref: "#/components/schemas/debitAccounting"
+        balances:
+          $ref: "#/components/schemas/balanceList"
+        cardTransactions:
+          $ref: "#/components/schemas/cardAccountReport"
+        _links:
+          $ref: "#/components/schemas/_linksReadCardTransactions"
+
+    cardAccountReport:
+      description: |
+        JSON based card account report.
+        
+        This card account report contains transactions resulting from the query parameters.
+      type: object
+      required:
+        - _links
+      properties:
+        booked:
+          $ref: "#/components/schemas/cardTransactionList"
+        pending:
+          $ref: "#/components/schemas/cardTransactionList"
+        _links:
+          $ref: "#/components/schemas/_linksCardAccountReport"
+
+    _linksCardAccountReport:
+      type: object
+      additionalProperties: 
+        $ref: "#/components/schemas/hrefType"
+      properties:
+        cardAccount:
+          $ref: "#/components/schemas/hrefType"
+        card:
+          $ref: "#/components/schemas/hrefType"
+        first:
+          $ref: "#/components/schemas/hrefType"
+        next:
+          $ref: "#/components/schemas/hrefType"
+        previous:
+          $ref: "#/components/schemas/hrefType"
+        last:
+          $ref: "#/components/schemas/hrefType"
+
+    _linksReadCardTransactions:
+      type: object
+      additionalProperties: 
+        $ref: "#/components/schemas/hrefType"
+      properties:
+        download:
+          $ref: "#/components/schemas/hrefType"
+
+    cardTransactionList:
+      description: Array of transaction details.
+      type: array
+      items: 
+        $ref: "#/components/schemas/cardTransaction"
+
+    cardTransactionId:
+      description: Unique end to end identity.
+      type: string
+      maxLength: 35
+
+    terminalId:
+      description: Identification of the Terminal, where the card has been used.
+      type: string 
+      maxLength: 35
+
+    transactionDate:
+      description: Date of the actual card transaction.
+      type: string
+      format: date
+
+    bookingDate:
+      description: |
+        The date when an entry is posted to an account on the ASPSPs books.
+      type: string
+      format: date
+
+    reportExchangeRateList:
+      description: Array of exchange rates.
+      type: array
+      items: 
+        $ref: "#/components/schemas/reportExchangeRate"
+
+    reportExchangeRate:
+      description: Exchange Rate.
+      type: object
+      required:
+        - sourceCurrency
+        - exchangeRate
+        - unitCurrency
+        - targetCurrency
+        - quotationDate
+      properties:
+        sourceCurrency:
+          $ref: "#/components/schemas/currencyCode"
+        exchangeRate:
+          type: string
+        unitCurrency:
+          $ref: "#/components/schemas/currencyCode"
+        targetCurrency:
+          $ref: "#/components/schemas/currencyCode"
+        quotationDate:
+          type: string
+          format: date
+        contractIdentification:
+          type: string
+          maxLength: 35
+
+    cardTransaction:
+      description: Card transaction information.
+      type: object
+      required: 
+        - transactionAmount
+      properties:
+        cardTransactionId:
+          $ref: "#/components/schemas/cardTransactionId"
+        terminalId:
+          $ref: "#/components/schemas/terminalId"
+        transactionDate:
+          $ref: "#/components/schemas/transactionDate"
+        acceptorTransactionDateTime:
+          description: Timestamp of the actual card transaction within the acceptance system
+          type: string
+          format: date-time
+        bookingDate:
+          $ref: "#/components/schemas/bookingDate"
+        valueDate:
+          description: The Date at which assets become available to the account owner in case of a credit, or cease to be available to the account owner in case of a debit entry.
+            For card transactions this is the payment due date of related booked transactions of a card.
+          type: string
+          format: date
+        transactionAmount:
+          $ref: "#/components/schemas/amount"
+        grandTotalAmount:
+          allOf:
+            - $ref: "#/components/schemas/amount"
+            - description: |
+                Total amount of the instalment including charges, insurance and taxes in addition to the funded amount.
+        currencyExchange:
+          $ref: "#/components/schemas/reportExchangeRateList"
+        originalAmount:
+          $ref: "#/components/schemas/amount"
+        markupFee:
+          $ref: "#/components/schemas/amount"
+        markupFeePercentage:
+          #description: Percentage of the involved transaction fee in relation to the billing amount, e.g. "0.3" for 0,3%.
+          type: string
+          example: "0.3"
+        cardAcceptorId:
+          #description: Identification of the Card Acceptor (e.g. merchant) as given in the related card transaction.
+          type: string
+          maxLength: 35
+        cardAcceptorAddress:
+          $ref: "#/components/schemas/address" 
+        cardAcceptorPhone:
+          $ref: "#/components/schemas/cardAcceptorPhone" 
+        merchantCategoryCode:
+          $ref: "#/components/schemas/merchantCategoryCode" 
+        maskedPAN:
+          $ref: "#/components/schemas/maskedPan"
+        transactionDetails:
+          type: string
+          maxLength: 1000
+        invoiced:
+          type: boolean
+        proprietaryBankTransactionCode:
+          $ref: "#/components/schemas/proprietaryBankTransactionCode"
+
+    cardAcceptorPhone:
+      description: |
+        Merchant phone number
+        It consists of a "+" followed by the country code (from 1 to 3 characters) then a "-" and finally, any
+        combination of numbers, "(", ")", "+" and "-" (up to 30 characters).
+        pattern according to ISO20022 \+[0-9]{1,3}-[0-9()+\-]{1,30}
+      type: string
+      pattern: '\+[0-9]{1,3}\-[0-9()+\-]{1,30}'
+
+    merchantCategoryCode:
+      description: Merchant category code.
+      type: string
+      maxLength: 4
+      minLength: 4
+
+    proprietaryBankTransactionCode:
+      description: |
+        Proprietary bank transaction code as used within a community or within an ASPSP e.g. 
+        for MT94x based transaction reports.
+      type: string
+      maxLength: 35
+
+    address:
+      type: object
+      required:
+        - country
+      properties:
+        streetName:
+          type: string
+          maxLength: 70
+        buildingNumber:
+          type: string
+        townName:
+          type: string
+        postCode:
+          type: string
+        country:
+          $ref: "#/components/schemas/countryCode"
+      example: 
+        {
+          streetName: "rue blue",
+          buildingnNumber: "89",
+          townName: "Paris",
+          postCode: "75000",
+          country: "FR"
+        }
+
+    countryCode:
+      description: ISO 3166 ALPHA2 country code.
+      type: string
+      pattern: "[A-Z]{2}"
+      example: "SE"
+
+    cardAccountDetails:
+      description: |
+        Card account details.
+      type: object
+      required:
+        - maskedPan
+        - currency
+      properties:
+        resourceId:
+          description: |
+            This is the data element to be used in the path when retrieving data from a dedicated account.
+            This shall be filled, if addressable resource are created by the ASPSP on the /card-accounts endpoint.
+          type: string
+        maskedPan:
+          $ref: "#/components/schemas/maskedPan"
+        currency:
+          $ref: "#/components/schemas/currencyCode"
+        ownerName:
+          $ref: "#/components/schemas/ownerName"
+        name:
+          description: |
+            Name of the card / card account, as assigned by the ASPSP, 
+            in agreement with the account owner in order to provide an additional means of identification of the account.
+          type: string
+          maxLength: 70
+        displayName:
+          $ref: "#/components/schemas/displayName"
+        product:
+          description: |
+            Product Name of the Bank for this card / card account, proprietary definition.
+          type: string
+          maxLength: 35
+        debitAccounting:
+          $ref: "#/components/schemas/debitAccounting"
+        status:
+          $ref: "#/components/schemas/accountStatus"
+        usage:
+          description: |
+            Specifies the usage of the card / card account:
+              * PRIV: private personal card / card account
+              * ORGA: professional card / card account
+          type: string
+          maxLength: 4
+          enum:
+            - "PRIV"
+            - "ORGA"
+        details:
+          description: |
+            Specifications that might be provided by the ASPSP:
+              - characteristics of the account
+              - characteristics of the relevant card
+          type: string
+          maxLength: 1000
+        creditLimit:
+          $ref: "#/components/schemas/amount"
+        balances:
+          $ref: "#/components/schemas/balanceList"
+        _links:
+          $ref: "#/components/schemas/_linksAccountDetails"
+    
+    maskedPan:
+      description: |
+        Primary Account Number (PAN) of the card in masked form. In the context of a response to a "/card-accounts" endpoint, this is the 
+        PAN of the main card; in the context of a "/cards" endpoint, this identifies the specific card for that the information is presented.
+        This data element can be used in the body of the Consent Request Message for retrieving account access consent from this card.
+      type: string
+      maxLength: 35
+      example: "123456xxxxxx1234"
+
+    currencyCode:
+      description: |
+        ISO 4217 Alpha 3 currency code.
+      type: string
+      pattern: '[A-Z]{3}'
+      example: "EUR"
+
+    ownerName:
+      description: |
+        Name of the legal account owner. 
+        If there is more than one owner, then e.g. two names might be noted here.
+        
+        For a corporate account, the corporate name is used for this attribute.
+        Even if supported by the ASPSP, the provision of this field might depend on the fact whether an explicit consent to this specific 
+        additional account information has been given by the PSU.
+        
+      type: string
+      maxLength: 140
+      example: "John Doe"
+
+    displayName:
+      description: |
+        Name of the card / card account as defined by the PSU within online channels.
+      type: string
+      maxLength: 70
+
+
+    debitAccounting:
+      description: |
+        If true, the amounts of debits on the reports are quoted positive with the related consequence for balances.
+        If false, the amount of debits on the reports are quoted negative.
+      type: boolean
+
+
+    accountStatus:
+      description: |
+        Account status. The value is one of the following:
+          - "enabled": card / card account is available
+          - "deleted": card / card account is terminated
+          - "blocked": card / card account is blocked e.g. for legal reasons
+        If this field is not used, than the card / card account is available in the sense of this specification.
+      type: string
+      enum:
+        - "enabled"
+        - "deleted"
+        - "blocked"
+
+    amount:
+      description: |
+      type: object
+      required:
+        - currency
+        - amount
+      properties:
+        currency:
+          $ref: "#/components/schemas/currencyCode"
+        amount:
+          $ref: "#/components/schemas/amountValue"
+      example: 
+        {
+          "currency": "EUR", 
+          "amount": "123"
+        }
+
+    amountValue:
+      description: |
+        The amount given with fractional digits, where fractions must be compliant to the currency definition.
+        Up to 14 significant figures. Negative amounts are signed by minus.
+        The decimal separator is a dot.
+        
+        **Example:**
+        Valid representations for EUR with up to two decimals are:
+        
+          * 1056
+          * 5768.2
+          * -1.50
+          * 5877.78
+      type: string
+      pattern: "-?[0-9]{1,14}(\\.[0-9]{1,3})?"
+      example: "5877.78"
+
+    balanceList:
+      description: |
+        The specific card account balances associated to this card / card account. In the context of a response to a "cards" endpoint, 
+        each balance that indicates that credit limit is included must respect all applicable credit limits relevant for this 
+        card ( cp. Section 6.6)
+      type: array
+      items:
+        $ref: "#/components/schemas/balance"
+
+    balance:
+      description: |
+        A single balance element.
+      type:
+        object
+      required:
+        - balanceAmount
+        - balanceType
+      properties:
+        balanceAmount:
+          $ref: "#/components/schemas/amount"
+        balanceType:
+          $ref: "#/components/schemas/balanceType"
+        creditLimitIncluded:
+          description: |
+            A flag indicating if the credit limit of the corresponding account 
+            is included in the calculation of the balance, where applicable.
+          type: boolean
+          example: false
+        lastChangeDateTime:
+          description: |
+            This data element might be used to indicate e.g. with the expected or booked balance that no action is known 
+            on the account, which is not yet booked.
+          type: string
+          format: date-time
+        referenceDate:
+          description: Reference date of the balance.
+          type: string
+          format: date
+        lastCommittedTransaction:
+          description: |
+            "entryReference" of the last commited transaction to support the TPP in identifying whether all 
+            PSU transactions are already known.
+          type: string
+          maxLength: 35
+
+    accountAccess:
+      description: |
+        Requested access services for a consent.
+      type: object
+      properties:
+        accounts:
+          description: |
+            Is asking for detailed account information. 
+            
+            If the array is empty in a request, the TPP is asking for an accessible account list. 
+            This may be restricted in a PSU/ASPSP authorization dialogue. 
+            If the array is empty, also the arrays for balances, additionalInformation sub attributes or transactions shall be empty, if used.
+          type: array
+          items:
+            $ref: "#/components/schemas/accountReference"
+        balances:
+          description: |
+            Is asking for balances of the addressed accounts.
+            
+            If the array is empty in the request, the TPP is asking for the balances of all accessible account lists. 
+            This may be restricted in a PSU/ASPSP authorization dialogue. 
+            If the array is empty, also the arrays for accounts, additionalInformation sub attributes or transactions shall be empty, if used.
+          type: array
+          items:
+            $ref: "#/components/schemas/accountReference"
+        transactions:
+          description: |
+            Is asking for transactions of the addressed accounts. 
+            
+            If the array is empty in the request, the TPP is asking for the transactions of all accessible account lists. 
+            This may be restricted in a PSU/ASPSP authorization dialogue. 
+            If the array is empty, also the arrays for accounts, additionalInformation sub attributes or balances shall be empty, if used.
+          type: array
+          items:
+            $ref: "#/components/schemas/accountReference"
+        additionalInformation:
+          $ref: "#/components/schemas/additionalInformationAccess"
+        availableAccounts:
+          description: |
+            Optional if supported by API provider.
+            
+            The values "allAccounts" and "allAccountsWithOwnerName" are admitted. 
+            The support of the "allAccountsWithOwnerName" value by the ASPSP is optional.
+          type: string
+          enum:
+            - "allAccounts"
+            - "allAccountsWithOwnerName"
+        availableAccounts:
+          description: |
+            Optional if supported by API provider.
+            
+            The values "allAccounts" and "allAccountsWithOwnerName" are admitted. 
+            The support of the "allAccountsWithOwnerName" value by the ASPSP is optional.
+          type: string
+          enum:
+            - "allAccounts"
+            - "allAccountsWithOwnerName"
+        allPsd2:
+          description: |
+            Optional if supported by API provider.
+            
+            The values "allAccounts" and "allAccountsWithOwnerName" are admitted. 
+            The support of the "allAccountsWithOwnerName" value by the ASPSP is optional.
+          type: string
+          enum:
+            - "allAccounts"
+            - "allAccountsWithOwnerName"
+        restrictedTo:
+          description: |
+            If the TPP requests access to accounts via availableAccounts (List of available accounts), global 
+            or bank driven consents, the TPP may include this element to restrict access to the referred 
+            account types. Absence of the element is interpreted as "no restriction" (therefore access to 
+            accounts of all types is requested). The element may only occur, if each of the elements 
+              - accounts 
+              - balances 
+              - transactions 
+            is either not present or contains an empty array. 
+          type: array
+          items:
+            $ref: "#/components/schemas/cashAccountType"
+
+    additionalInformationAccess:
+      description: |
+        Optional if supported by API provider.
+        
+        Is asking for additional information as added within this structured object.
+        The usage of this data element requires at least one of the entries "accounts", 
+        "transactions" or "balances" also to be contained in the object. 
+        If detailed accounts are referenced, it is required in addition that any account addressed within 
+        the additionalInformation attribute is also addressed by at least one of the attributes "accounts", 
+        "transactions" or "balances".
+      type: object
+      properties:
+        ownerName:
+          description: |
+            Is asking for account owner name of the accounts referenced within. 
+            If the array is empty in the request, the TPP is asking for the account 
+            owner name of all accessible accounts. 
+            This may be restricted in a PSU/ASPSP authorization dialogue. 
+            If the array is empty, also the arrays for accounts, balances or transactions shall be empty, if used.
+            The ASPSP will indicate in the consent resource after a successful authorisation, 
+            whether the ownerName consent can be accepted by providing the accounts on which the ownerName will 
+            be delivered. 
+            This array can be empty.
+          type: array
+          items:
+            $ref: "#/components/schemas/accountReference"
+        trustedBeneficiaries:
+          description: |
+            Optional if supported by API provider.
+            Is asking for the trusted beneficiaries related to the accounts referenced within and related to the PSU.
+            If the array is empty in the request, the TPP is asking for the lists of trusted beneficiaries of all accessible accounts. 
+            This may be restricted in a PSU/ASPSP authorization dialogue by the PSU if also the account lists addressed 
+            by the tags �accounts�, �balances� or �transactions� are empty.
+            The ASPSP will indicate in the consent resource after a successful authorisation, 
+            whether the trustedBeneficiaries consent can be accepted by providing the accounts on which the list of trusted beneficiaries will be delivered. 
+            This array can be empty.
+          type: array
+          items:
+            $ref: "#/components/schemas/accountReference"
+
+    balanceType:
+      description: |
+        The following balance types are defined:
+          - "closingBooked": 
+            Balance of the account at the end of the pre-agreed account reporting period. 
+            It is the sum of the opening booked balance at the beginning of the period and all entries booked 
+            to the account during the pre-agreed account reporting period.
+            
+            For card-accounts and cards, this is composed of
+            
+              - invoiced, but not yet paid entries
+                For cards the account entries are booking entries from the card processor or invoices paid by the PSU. 
+            
+          - "expected":
+            Balance composed of booked entries and pending items known at the time of calculation, 
+            which projects the end of day balance if everything is booked on the account and no other entry is posted.
+            
+            For card accounts, this is composed of:
+              - invoiced, but not yet paid entries
+              - not yet invoiced but already booked entries and
+              - pending items (not yet booked)
+            
+            For card-accounts:
+            
+            "money to spend with the value of a pre-approved credit limit on the card account"
+            
+          - "openingBooked":
+            Book balance of the account at the beginning of the account reporting period. 
+            It always equals the closing book balance from the previous report.
+          - "interimAvailable":
+            Available balance calculated in the course of the account ?servicer?s business day, 
+            at the time specified, and subject to further changes during the business day. 
+            The interim balance is calculated on the basis of booked credit and debit items during the calculation 
+            time/period specified.
+            
+            For card-accounts, this is composed of:
+              - invoiced, but not yet paid entries
+              - not yet invoiced but already booked entries
+              
+            For cards, this is composed of 
+              - invoiced, but not yet paid entries 
+              - not yet invoiced but already booked entries 
+              - pending items (not yet booked)
+          - "interimBooked":
+            Balance calculated in the course of the account servicer's business day, at the time specified, 
+            and subject to further changes during the business day. 
+            The interim balance is calculated on the basis of booked credit and debit items during the calculation time/period 
+            specified.
+          - "forwardAvailable":
+            Forward available balance of money that is at the disposal of the account owner on the date specified.
+          - "nonInvoiced": 
+            Only for card accounts, to be checked yet. 
+      type: string
+      enum:
+          - "closingBooked"
+          - "expected"
+          - "openingBooked"
+          - "interimAvailable"
+          - "interimBooked"
+          - "forwardAvailable"
+          - "nonInvoiced"
+
+    _linksAccountDetails:
+      description: |
+        Links to the card / card account, which can be directly used for retrieving account information from this dedicated account.
+        
+        Links to "balances" and/or "cardTransactions"
+        
+        These links are only supported, when the corresponding consent has been already granted.
+      type: object
+      additionalProperties: 
+        $ref: "#/components/schemas/hrefType"
+      properties:
+        balances:
+          $ref: "#/components/schemas/hrefType"
+        transactions:
+          $ref: "#/components/schemas/hrefType"
+        card:
+          $ref: "#/components/schemas/hrefType"
+        cardTransactions:
+          $ref: "#/components/schemas/hrefType"
+
+    hrefType:
+      description: Link to a resource.
+      type: object
+      properties:
+        href:
+          $ref: "#/components/schemas/hrefEntry"
+
+    hrefEntry:
+      description: Link to a resource.
+      type: string
+      example: "/v1/payments/sepa-credit-transfers/1234-wertiq-983"
+
+    cardId:
+      description: |
+        This identification is denoting the addressed card.
+      type: string
+
+    accountReference:
+      description: | 
+        Reference to an account by either
+          * IBAN, of a payment accounts, or
+          * BBAN, for payment accounts if there is no IBAN, or 
+          * the Primary Account Number (PAN) of a card, can be tokenised by the ASPSP due to PCI DSS requirements, or
+          * the Primary Account Number (PAN) of a card in a masked form, or
+          * an alias to access a payment account via a registered mobile phone number (MSISDN)
+      type: object
+      properties:
+        iban: 
+          $ref: "#/components/schemas/iban"
+        bban: 
+          $ref: "#/components/schemas/bban"
+        pan: 
+          $ref: "#/components/schemas/pan"
+        maskedPan: 
+          $ref: "#/components/schemas/maskedPan"
+        msisdn: 
+          $ref: "#/components/schemas/msisdn"
+#        other:
+#          $ref: "#/components/schemas/otherType"
+        currency:
+          $ref: "#/components/schemas/currencyCode"
+        cashAccountType:
+          $ref: "#/components/schemas/cashAccountType"
+
+    iban:
+      type: string
+      description: IBAN of an account.
+      pattern: "[A-Z]{2,2}[0-9]{2,2}[a-zA-Z0-9]{1,30}"
+      example: "FR7612345987650123456789014"
+
+    bban:
+      description: |
+        Basic Bank Account Number (BBAN) Identifier.
+        
+        This data element can be used in the body of the consent request.
+          Message for retrieving account access consent from this account. This
+          data elements is used for payment accounts which have no IBAN.
+          ISO20022: Basic Bank Account Number (BBAN). 
+          
+          Identifier used nationally by financial institutions, i.e., in individual countries, 
+          generally as part of a National Account Numbering Scheme(s), 
+          which uniquely identifies the account of a customer.
+      type: string
+      pattern: "[a-zA-Z0-9]{1,30}" 
+      example: "BARC12345612345678"
+
+    pan:
+      description: |
+        Primary Account Number according to ISO/IEC 7812.
+      type: string
+      maxLength: 35
+      #According to ISO the following should be valid.
+      #maxLength: 19
+      #minLength: 8
+      #pattern: "[0-9]{8,19}"
+      example: "5409050000000000"
+       
+    msisdn:
+      type: string
+      maxLength: 35
+      description: Mobile phone number.
+      example: "+49 170 1234567"
+
+
+    otherType:
+      description: In cases where the specifically defined criteria (IBAN, BBAN, MSISDN)
+        are not provided to identify an instance of the respective account type (e.g. a savings account), 
+        the ASPSP shall include a proprietary ID of the respective account that uniquely identifies the account for this ASPSP.
+      type: object
+      required: 
+        - identification
+      properties:
+        identification:
+          description: Proprietary identification of the account.
+          type: string
+          maxLength: 35
+        schemeNameCode:
+          description: An entry provided by an external ISO code list. 
+          type: string
+        schemeNameProprietary:
+          description: A scheme name defined in a proprietary way.
+          type: string
+          maxLength: 35
+        issuer:
+          description: Issuer of the identification.
+          type: string
+          maxLength: 35
+
+
+    cashAccountType:
+      description: |
+        ExternalCashAccountType1Code from ISO 20022 or Type "CARD". The API provider may restrict the accepted 
+        values further (e.g. only "CARD" and "CACC" may be supported). The TPP includes this element, if the 
+        account reference may identify several accounts of different types, but the TPP only requests access to 
+        a specific type (e.g. card accounts).
+      type: string
+#      enum:
+#        - "CACC"
+#        - "CARD"
+#        - "CASH"
+#        - "CHAR"
+#        - "CISH"
+#        - "COMM"
+#        - "CPAC"
+#        - "LLSV"
+#        - "LOAN"
+#        - "MGLD"
+#        - "MOMA"
+#        - "NREX"
+#        - "ODFT"
+#        - "ONDP"
+#        - "OTHR"
+#        - "SACC"
+#        - "SLRY"
+#        - "SVGS"
+#        - "TAXE"
+#        - "TRAN"
+#        - "TRAS"
+
+    Error400_NG: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 400.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage400"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+    Error400: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 400.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode400"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode400"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+          
+    tppMessage400:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode400"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+
+    _linksAll:
+      description: |
+        A _link object with all availabel link types.
+      type: object
+      additionalProperties: 
+        $ref: "#/components/schemas/hrefType"
+      properties:
+        scaRedirect:
+          $ref: "#/components/schemas/hrefType"
+        scaOAuth:
+          $ref: "#/components/schemas/hrefType"
+        confirmation:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisation:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithPsuIdentification:
+          $ref: "#/components/schemas/hrefType"
+        updatePsuIdentification:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithProprietaryData:
+          $ref: "#/components/schemas/hrefType"
+        updateProprietaryData:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        updatePsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithEncryptedPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        updateEncryptedPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        updateAdditionalPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        updateAdditionalEncryptedPsuAuthentication:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithAuthenticationMethodSelection:
+          $ref: "#/components/schemas/hrefType"
+        selectAuthenticationMethod:
+          $ref: "#/components/schemas/hrefType"
+        startAuthorisationWithTransactionAuthorisation:
+          $ref: "#/components/schemas/hrefType"
+        authoriseTransaction:
+          $ref: "#/components/schemas/hrefType"
+        self:
+          $ref: "#/components/schemas/hrefType"
+        status:
+          $ref: "#/components/schemas/hrefType"
+        scaStatus:
+          $ref: "#/components/schemas/hrefType"
+        account:
+          $ref: "#/components/schemas/hrefType"
+        balances:
+          $ref: "#/components/schemas/hrefType"
+        transactions:
+          $ref: "#/components/schemas/hrefType"
+        transactionDetails:
+          $ref: "#/components/schemas/hrefType"
+        cardAccount:
+          $ref: "#/components/schemas/hrefType"
+        cardTransactions:
+          $ref: "#/components/schemas/hrefType"
+        first:
+          $ref: "#/components/schemas/hrefType"
+        next:
+          $ref: "#/components/schemas/hrefType"
+        previous:
+          $ref: "#/components/schemas/hrefType"
+        last:
+          $ref: "#/components/schemas/hrefType"
+        download:
+          $ref: "#/components/schemas/hrefType"
+
+    MessageCode400: 
+      description: Message codes defined for HTTP Error code 400 (BAD_REQUEST).
+      type: string
+      enum: 
+        - "FORMAT_ERROR"              #gen
+        - "PARAMETER_NOT_CONSISTENT"  #gen
+        - "PARAMETER_NOT_SUPPORTED"   #gen
+        - "SERVICE_INVALID"           #gen
+        - "RESOURCE_UNKNOWN"          #gen
+        - "RESOURCE_EXPIRED"          #gen
+        - "RESOURCE_BLOCKED"          #gen
+        - "TIMESTAMP_INVALID"         #gen
+        - "PERIOD_INVALID"            #gen
+        - "SCA_METHOD_UNKNOWN"        #gen
+        - "SCA_INVALID"               #gen
+        - "CONSENT_UNKNOWN"           #gen
+
+    tppErrorTitle:
+      description: |
+        Short human readable description of error type. 
+        Could be in local language. 
+        To be provided by ASPSPs.
+      type: string
+      maxLength: 70
+
+    tppErrorDetail:
+      description: |
+        Detailed human readable text specific to this instance of the error. 
+        XPath might be used to point to the issue generating the error in addition.
+        Remark for Future: In future, a dedicated field might be introduced for the XPath.
+      type: string
+      maxLength: 500
+
+    tppMessageCategory:
+      description: Category of the TPP message category.
+      type: string
+      enum:
+        - "ERROR"
+        - "WARNING"
+
+    tppMessageText:
+      description: Additional explaining text to the TPP.
+      type: string
+      maxLength: 500
+
+    Error401_NG: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 401.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage401"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+    tppMessage401:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode401"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+    MessageCode401: 
+      description: Message codes defined for HTTP Error code 401 (UNAUTHORIZED).
+      type: string
+      enum: 
+        - "CERTIFICATE_INVALID"       #gen
+        - "ROLE_INVALID"              #gen
+        - "CERTIFICATE_EXPIRED"       #gen
+        - "CERTIFICATE_BLOCKED"       #gen
+        - "CERTIFICATE_REVOKE"        #gen
+        - "CERTIFICATE_MISSING"       #gen
+        - "SIGNATURE_INVALID"         #gen
+        - "SIGNATURE_MISSING"         #gen
+        - "CORPORATE_ID_INVALID"      #gen
+        - "PSU_CREDENTIALS_INVALID"   #gen
+        - "CONSENT_INVALID"           #gen
+        - "CONSENT_EXPIRED"           #gen
+        - "TOKEN_UNKNOWN"             #gen
+        - "TOKEN_INVALID"             #gen
+        - "TOKEN_EXPIRED"             #gen
+
+    Error401: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 401.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode401"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode401"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+    Error403: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 403.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode403"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode403"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+    MessageCode403: 
+      description: Message codes defined for HTTP Error code 403 (FORBIDDEN).
+      type: string
+      enum: 
+        - "CONSENT_UNKNOWN"           #gen
+        - "SERVICE_BLOCKED"           #gen
+        - "RESOURCE_UNKNOWN"          #gen
+        - "RESOURCE_EXPIRED"          #gen
+
+    Error403_NG: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 403.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage403"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+    tppMessage403:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode403"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+    Error404_NG: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 404.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage404"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+    tppMessage404:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode404"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+    MessageCode404: 
+      description: Message codes defined for HTTP Error code 404 (NOT FOUND).
+      type: string
+      enum: 
+        - "RESOURCE_UNKNOWN"          #gens
+
+    Error404: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 404.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode404"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode404"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+    Error405_NG: 
+      description: |
+        NextGenPSD2 specific definition of reporting error information in case of a HTTP error code 405.
+      type: object
+      properties:
+        tppMessages:
+          type: array
+          items:
+            $ref: "#/components/schemas/tppMessage405"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+    tppMessage405:
+      type: object
+      required:
+        - category
+        - code
+      properties:
+        category:
+           $ref: "#/components/schemas/tppMessageCategory"
+        code:
+          $ref: "#/components/schemas/MessageCode405"
+        path:
+          type: string
+        text:
+          $ref: "#/components/schemas/tppMessageText"
+
+    MessageCode405: 
+      description: Message codes defined for HTTP Error code 405 (METHOD NOT ALLOWED).
+      type: string
+      enum: 
+        - "SERVICE_INVALID"           #gens
+
+    Error405: 
+      description: |
+        Standardised definition of reporting error information according to [RFC7807] 
+        in case of a HTTP error code 405.
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type: 
+          description: |
+            A URI reference [RFC3986] that identifies the problem type. 
+            Remark For Future: These URI will be provided by NextGenPSD2 in future.
+          type: string
+          format: uri
+          maxLength: 70
+        title:
+          description: |
+            Short human readable description of error type. 
+            Could be in local language. 
+            To be provided by ASPSPs.
+          type: string
+          maxLength: 70
+        detail:
+          description: |
+            Detailed human readable text specific to this instance of the error. 
+            XPath might be used to point to the issue generating the error in addition.
+            Remark for Future: In future, a dedicated field might be introduced for the XPath.
+          type: string
+          maxLength: 500
+        code:
+          $ref: "#/components/schemas/MessageCode405"
+        additionalErrors:
+          description: |
+            Array of Error Information Blocks.
+            
+            Might be used if more than one error is to be communicated
+          type: array
+          items: #ErrorInformation
+            description: This is a data element to support the declaration of additional errors in the context of [RFC7807]. 
+            type: object
+            required:
+              - code
+            properties:
+              title:
+                $ref: "#/components/schemas/tppErrorTitle"
+              detail:
+                $ref: "#/components/schemas/tppErrorDetail"
+              code:
+                $ref: "#/components/schemas/MessageCode405"
+        _links:
+          $ref: "#/components/schemas/_linksAll"
+
+#####################################################
+# Content of Request Bodies
+#####################################################
+
+    #####################################################
+    # Content of Request Bodies - JSON
+    #####################################################
+
+    
+
+    #####################################################
+    # Content of Request Bodies - XML
+    #####################################################
+
+      #####################################################
+      # Content of Request Bodies - Single Part
+      #####################################################
+
+
+
+    #####################################################
+    # Content of Request Bodies - JSON
+    #####################################################
+
+   
+   
+#####################################################
+# _links
+#####################################################
+
+
+#####################################################
+# Tpp-Messages to Communicate Error Information
+#####################################################
+
+
+  #####################################################
+  # Generic Elements
+  #####################################################
+
+  parameters:
+  #####################################################
+  # Predefined Parameters
+  #####################################################
+
+    X-Request-ID:
+      name: X-Request-ID
+      in: header
+      description: ID of the request, unique to the call, as determined by the initiating party.
+      required: true
+      example: "99391c7e-ad88-49ec-a2ad-99ddcb1f7721"
+      schema:
+        type: string
+        format: uuid
+
+    consentId_HEADER_mandatory:
+      name: Consent-ID
+      in: header
+      description: |
+        Identification of the corresponding consent as granted by the PSU.
+      required: true
+      schema:
+        $ref: "#/components/schemas/consentId"
+
+    PSU-IP-Address_optional:
+      name: PSU-IP-Address
+      in: header
+      description: |
+        The forwarded IP Address header field consists of the corresponding http request IP Address field between PSU and TPP.
+      schema:
+        type: string
+        format: ipv4
+      required: false
+      example: 192.168.8.78
+
+    Authorization:
+      name: Authorization
+      in: header
+      description: |
+        Is contained only, if an OAuth2 based SCA was performed in the corresponding mandate transaction or if OAuth2 has been used in 
+        a pre-step.
+      required: false
+      schema:
+        $ref: "#/components/schemas/authorization"
+
+    cardId_PATH:
+      name: card-id
+      in: path
+      description: |
+        This identification is denoting the addressed card. The card-id is retrieved by using a "Read Card List" call. 
+        The card-id is the "resourceId" attribute of the card structure. Its value is constant at least throughout the lifecycle 
+        of a given consent.
+      required: true
+      schema:
+        $ref: "#/components/schemas/cardId"
+
+    dateFrom:
+      name: dateFrom
+      in: query
+      description: |
+        Conditional: Starting date (inclusive the date dateFrom) of the transaction list, mandated if no delta access is required
+        and if bookingStatus does not equal "information".
+        For booked transactions, the relevant date is the booking date. 
+        For pending transactions, the relevant date is the entry date, which may not be transparent 
+        neither in this API nor other channels of the ASPSP.
+        
+        Optional: For card balances. This parameter is ignored by the ASPSP if it is not supported. 
+        Requests in addition to the balances of the current accounting period all booked balances at the end of previous accounting periods (e.g. monthly periods) from the provided date on if still retrievable under the given consent.
+        Note: The accounting period for card balances is the invoicing period of the related card.
+        
+       
+      required: false
+      schema:
+        type: string
+        format: date
+
+    dateTo:
+      name: dateTo
+      in: query
+      description: |
+        End date (inclusive the data dateTo) of the transaction list, default is "now" if not given. 
+        Might be ignored if a delta function is used.
+        For booked transactions, the relevant date is the booking date. 
+        For pending transactions, the relevant date is the entry date, which may not be transparent 
+        neither in this API nor other channels of the ASPSP.
+      required: false
+      schema:
+        type: string
+        format: date
+
+
+    bookingStatusCard:
+      name: bookingStatus
+      in: query
+      description: |
+        Permitted codes are 
+          * "booked",
+          * "pending",  
+          * "both",
+        "booked" shall be supported by the ASPSP.
+        To support the "pending" and "both" feature is optional for the ASPSP, 
+        Error code if not supported in the online banking frontend.
+        If supported, "both" means to request transaction reports of transaction of bookingStatus either "pending" or "booked".
+        
+      required: true
+      schema:
+        type: string
+        enum:
+          - "booked"
+          - "pending"
+          - "both"
+
+
+    deltaList:
+      name: deltaList
+      in: query
+      description: 
+        This data attribute is indicating that the AISP is in favour to get all transactions after the last report access 
+        for this PSU on the addressed account. 
+        This is another implementation of a delta access-report.
+        This delta indicator might be rejected by the ASPSP if this function is not supported.
+        Optional if supported by API provider
+      schema:
+        type: boolean
+
+  # requestBodies:
+  #####################################################
+  # Reusable Request Bodies
+  #####################################################
+  
+ 
+  headers:
+  #####################################################
+  # Reusable Response Header Elements
+  #####################################################
+  
+    X-Request-ID:
+      description: ID of the request, unique to the call, as determined by the initiating party.
+      required: true
+      example: "99391c7e-ad88-49ec-a2ad-99ddcb1f7721"
+      schema:
+        type: string
+        format: uuid
+
+    Location:
+      description: |
+        Location of the created resource.
+      schema:
+        type: string
+        format: url
+      required: false
+      
+
+   
+  responses:
+  #####################################################
+  # Reusabale Responses
+  #####################################################
+    #####################################################
+    # Positive Responses
+    #####################################################
+
+    OK_200_CARDS:
+      description: OK
+      
+      headers: 
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/readCardListResponse-200_json"
+          examples:
+            example:
+              $ref: "#/components/examples/readCardListResponse-200_json_Example"
+        
+    OK_200_CARDDETAILS:
+      description: OK
+      
+      headers: 
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/readCardDetailsResponse-200_json"
+          examples:
+            "Example 1 (standard card)":
+              $ref: "#/components/examples/readCardDetailsResponse-200_json_Example1"
+            "Example 2 (multicurrency card with balances)":
+              $ref: "#/components/examples/readCardDetailsResponse-200_json_Example2"
+           
+    OK_200_CARDBALANCES:
+      description: OK
+      
+      headers: 
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/readCardBalancesResponse-200_json"
+          examples:
+            "Example 1: Example on current balance only":
+              $ref: "#/components/examples/readCardBalancesResponse-200_json_Example1"
+            "Example 2: Example on booked balances of the past requested in addition":
+              $ref: "#/components/examples/readCardBalancesResponse-200_json_Example2"
+
+
+    OK_200_CARDTRANSACTIONS:
+      description: OK
+      
+      headers: 
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/readCardTransactionsResponse-200_json"
+          examples:
+            example:
+              $ref: "#/components/examples/readCardTransactionsResponse-200_json_Example"
+
+    #####################################################
+    # Negative Responses
+    #####################################################
+    BAD_REQUEST_400:
+      description: Bad Request
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error400_NG" 
+
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Error400" 
+
+    UNAUTHORIZED_401:
+      description: Unauthorized
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error401_NG" 
+
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error401" 
+
+    FORBIDDEN_403:
+      description: Forbidden
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error403_NG" 
+
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error403" 
+
+    NOT_FOUND_404:
+      description: Not found
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error404_NG" 
+
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error404" 
+
+    METHOD_NOT_ALLOWED_405:
+      description: Method Not Allowed
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error405_NG" 
+
+        application/problem+json:
+          schema:
+             $ref: "#/components/schemas/Error405" 
+
+    REQUEST_TIMEOUT_408: 
+      description: Request Timeout
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      #No Response body because there are no valid message codes in case of HTTP code 408
+
+    UNSUPPORTED_MEDIA_TYPE_415:
+      description: Unsupported Media Type
+      
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      #No Response body because there are no valid message codes in case of HTTP code 415 
+
+    INTERNAL_SERVER_ERROR_500:
+      description: Internal Server Error
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      #No Response body because there are no valid message codes in case of HTTP code 500 
+
+    SERVICE_UNAVAILABLE_503:
+      description: Service Unavailable
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+        X-Request-ID:
+          $ref: "#/components/headers/X-Request-ID"
+      #No Response body because there are no valid message codes in case of HTTP code 503
+
+  examples:
+  #####################################################
+  # Predefined Examples
+  #####################################################
+
+    readCardListResponse-200_json_Example:
+      description: Read card list.
+      value:
+        {
+          "cards": [
+            {
+              "resourceId": "4d9a81b3-a47d-4130-8765-a9c0ff861b99",
+              "maskedPan": "525412******3241",
+              "currency": "EUR",
+              "name": "Main",
+              "product": "Basic Credit Card", 
+              "debitAccounting": false,
+              "status": "enabled",
+              "creditLimit": { "currency": "EUR", "amount": "5000" },
+              "balances": [
+                {
+                  "balanceType": "interimBooked",
+                  "balanceAmount": { "currency": "EUR", "amount": "-1390.10" }
+                },{
+                "balanceType": "interimAvailable",
+                �creditLimitIncluded�: true,
+                "balanceAmount": { "currency": "EUR", "amount": "3609.90" }
+              }
+            ]
+          },{
+            "resourceId": "4d9a81b3-a47d-4130-8765-a9c0ff861b98",
+            "maskedPan": "525412******3242",
+            "currency": "EUR",
+            "name": "PartnerCard",
+            "product": "Basic Credit Card",
+            "debitAccounting": false,
+            "status": "enabled",
+            "creditLimit": { "currency": "EUR", "amount": "5000" },
+            "balances": [
+              {
+                "balanceType": "interimBooked",
+                "balanceAmount": { "currency": "EUR", "amount": "-559.10" }
+              },{
+                "balanceType": "interimAvailable",
+                �creditLimitIncluded�: true,
+                "balanceAmount": { "currency": "EUR", "amount": "4440.90" }
+              }
+            ]
+          }
+        ]
+      }     
+
+    readCardDetailsResponse-200_json_Example1:
+      description: Read card details.
+      value:
+        {
+          "card": {
+            "resourceId": "4d9a81b3-a47d-4130-8765-a9c0ff861b99",
+            "maskedPan": "525412******3241",
+            "currency": "EUR",
+            "debitAccounting": false,
+            "name": "Main",
+            "product": "Basic Credit Card",
+            "status": "enabled",
+            "creditLimit": {
+              "currency": "EUR",
+              "amount": "5000"
+            },
+            "balances": [
+              {
+                "balanceType": "interimBooked",
+                "balanceAmount": {
+                  "currency": "EUR",
+                  "amount": "-1390.10"
+                }
+              },
+              {
+                "balanceType": "interimAvailable",
+                "creditLimitIncluded": true,
+                "balanceAmount": {
+                  "currency": "EUR",
+                  "amount": "3609.90"
+                }
+              }
+            ],
+            "_links": {
+              "self": {
+                "href": "/v1/cards/4d9a81b3-a47d-4130-8765-a9c0ff861b99"
+              },
+              "transactions": {
+                "href": "/v1/cards/4d9a81b3-a47d-4130-8765-a9c0ff861b99/transactions"
+              }
+            }
+          }
+        }
+
+    readCardDetailsResponse-200_json_Example2:
+      description: Read card details.
+      value:
+        {
+          "card": {
+            "resourceId": "4d9a81b3-a47d-4130-8765-a9c0ff861b99",
+            "maskedPan": "525412******3241",
+            "currency": "XXX",
+            "name": "Main",
+            "product": "Basic Credit Card",
+            "debitAccounting": false,
+            "status": "enabled",
+            "creditLimit": {
+              "currency": "EUR",
+              "amount": "5000"
+            },
+            "balances": [
+              {
+                "balanceType": "interimBooked",
+                "balanceAmount": {
+                  "currency": "EUR",
+                  "amount": "-1390.10"
+                }
+              },
+              {
+                "balanceType": "interimAvailable",
+                "creditLimitIncluded": true,
+                "balanceAmount": {
+                  "currency": "EUR",
+                  "amount": "3155.17"
+                }
+              },
+              {
+                "balanceType": "interimBooked",
+                "balanceAmount": {
+                  "currency": "USD",
+                  "amount": "500.20"
+                }
+              },
+              {
+                "balanceType": "interimAvailable",
+                "creditLimitIncluded": true,
+                "balanceAmount": {
+                  "currency": "EUR",
+                  "amount": "3470.69"
+                }
+              }
+            ],
+            "_links": {
+              "self": {
+                "href": "/v1/cards/4d9a81b3-a47d-4130-8765-a9c0ff861b99"
+              },
+              "transactions": {
+                "href": "/v1/cards/4d9a81b3-a47d-4130-8765-a9c0ff861b99/transactions"
+              }
+            }
+          }
+        }
+
+    readCardBalancesResponse-200_json_Example1:
+      description: |
+        Read card balances.
+        Example on current balance only
+      value:
+        {
+          "card": {"maskedPan": "525412******3241"},
+          "debitAccounting": false,
+          "balances":
+            [
+              {
+                "balanceAmount": 
+                  { 
+                    "currency": "EUR", 
+                    "amount": "5654.22" 
+                  }, 
+                "balanceType": "interimAvailable",
+                "creditLimitIncluded": true
+              },
+              {
+                "balanceAmount": 
+                  {
+                    "currency": "EUR",
+                    "amount": "-4355.78"
+                  }, 
+                "balanceType": "interimBooked"
+              }
+            ]
+          }
+
+
+    readCardBalancesResponse-200_json_Example2:
+      description: |
+        Read card balances.
+        Example on booked balances of the past requested in addition
+      value:
+        {
+          "card": {"maskedPan": "525412******3241"},
+          "debitAccounting": false,
+          "balances":
+            [
+              {
+                "balanceAmount": { "currency": "EUR", "amount": "5654.22" },
+                "balanceType": "interimAvailable",
+                "creditLimitIncluded": true,
+              },
+              {
+                "balanceAmount": 
+                  {
+                    "currency": "EUR", 
+                    "amount": "-4355.78"
+                  }, 
+                "balanceType": "interimBooked"
+              },
+              {
+                "balanceAmount": 
+                  {
+                    "currency": "EUR",
+                    "amount": "-2255.45"
+                  },
+                "balanceType": "closingBooked",
+                "referenceDate": "2020-06-30"
+              },
+              {
+                "balanceAmount":
+                  { 
+                    "currency": "EUR", 
+                    "amount": "-1234.56"
+                  },
+                "balanceType": "closingBooked",
+                "referenceDate": "2020-07-31"
+              },
+              {
+                "balanceAmount": 
+                  {
+                    "currency": "EUR", 
+                    "amount": "-234.01"
+                  },
+                "balanceType": "closingBooked",
+                "referenceDate": "2020-08-31"
+               }
+            ]
+        }
+
+
+
+    readCardTransactionsResponse-200_json_Example:
+      description: Read card transaction list.
+      value:
+        {
+          "card": {
+            "maskedPan": "525412******3241"
+          },
+          "debitAccounting": false,
+          "cardTransactions": {
+            "booked": [
+              {
+                "cardTransactionId": "201710020036959",
+                "transactionAmount": {
+                  "currency": "EUR",
+                  "amount": "256.67"
+                },
+                "transactionDate": "2017-10-25",
+                "bookingDate": "2017-10-26",
+                "originalAmount": {
+                  "currency": "SEK",
+                  "amount": "2499"
+                },
+                "cardAcceptorAddress": {
+                  "city": "STOCKHOLM",
+                  "country": "SE"
+                },
+                "proprietaryBankTransactionCode": "PURCHASE",
+                "invoiced": false,
+                "transactionDetails": "WIFIMARKET.SE"
+              },
+              {
+                "cardTransactionId": "201710020091863",
+                "transactionAmount": {
+                  "currency": "EUR",
+                  "amount": "10.72"
+                },
+                "transactionDate": "2017-10-25",
+                "bookingDate": "2017-10-26",
+                "originalAmount": {
+                  "currency": "SEK",
+                  "amount": "99"
+                },
+                "cardAcceptorAddress": {
+                  "city": "STOCKHOLM",
+                  "country": "SE"
+                },
+                "proprietaryBankTransactionCode": "PURCHASE",
+                "invoiced": false,
+                "transactionDetails": "ICA SUPERMARKET SKOGHA"
+              }
+            ],
+            "pending": [],
+            "_links": {
+              "card": {
+                "href": "/v1/cards/4d9a81b3-a47d-4130-8765-a9c0ff861b99"
+              }
+            }
+          }
+        }
+          
+security:
+#####################################################
+# Global security options
+#####################################################
+  - {}
+
+
+
