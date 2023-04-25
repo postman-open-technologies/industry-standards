@@ -20,5 +20,8 @@ This is the list of standards we are currently working with, organized in priori
 - **TMForum** ([Website](https://www.tmforum.org/)) (Specification) ([Workspace](https://www.postman.com/api-evangelist/workspace/tm-forum/overview)) (Discussion)
 - **BIAN** ([Website](https://bian.org/)) ([GitHub](https://github.com/bian-official)) (Specification) ([Workspace](https://www.postman.com/postman/workspace/postman-open-technologies-banking-industry-architecture-network-bian/overview)) (Discussion)
 - **IATA** ([Website](https://www.iata.org/)) (Specification) ([Workspace](https://www.postman.com/postman/workspace/postman-open-technologies-partners-iata/overview)) (Discussion)
+- **OpenRTB** ([Website](https://iabtechlab.com/standards/openrtb/)) ([Specification](https://github.com/InteractiveAdvertisingBureau/openrtb2.x/releases/tag/2.6-202211)) (Workspace) (Discussion)
+- **Prebid** ([Website](https://www.prebid.org)) ([Specification](https://docs.prebid.org/prebid-server/developers/add-new-bidder-go.html#bidder-parameters)) (Workspace) (Discussion)
+- **Dynamic Content Ads** ([Website](https://iabtechlab.com/working-groups/dynamic-content-ad-standards/)) ([Specification](https://github.com/InteractiveAdvertisingBureau/dynamicContentAdsSchema)) (Workspace) (Discussion)
 
 Feel free to submit PR and issues to suggest new standards or expand on the goals of the project, introducing additional industries into the mix. Not all of the standards have official OpenAPI or AsyncAPI, but the goal of the work might include producing and maintaining a definition until the standards body supports it as part of their own governance process.
