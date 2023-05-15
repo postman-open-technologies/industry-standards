@@ -1,8 +1,105 @@
 - standardsBody: Berlin Group
-  files:
-    - psd2-api v1.3.12-2022-07-06.yaml
-    - psd2-api-lean_push_notifications v1.0.0-20200519v2.yaml
-    - psd2-confirmation-of-funds-consent 2.0 20190607.yaml
-    - psd2-api-trusted_beneficiaries v1.0.0 20200519v1.yaml
-    - psd2-api-ais-single-cards v1.3.0 2021-06-30.yaml
-    - psd2-api-savings-and-loans v1.1.0-2022-05-05v1.yaml
+  openApi:
+    directory: payment-services-directive/openapi/berlin-group
+    files:
+      - psd2-api v1.3.12-2022-07-06.yaml
+      - psd2-api-lean_push_notifications v1.0.0-20200519v2.yaml
+      - psd2-confirmation-of-funds-consent 2.0 20190607.yaml
+      - psd2-api-trusted_beneficiaries v1.0.0 20200519v1.yaml
+      - psd2-api-ais-single-cards v1.3.0 2021-06-30.yaml
+      - psd2-api-savings-and-loans v1.1.0-2022-05-05v1.yaml
+- standardsBody: UK Open Banking
+  openApi:
+    directory: uk-open-banking/openapi
+    files:
+      - v2.3.0/atml.2.3.0.swagger.json
+      - v2.3.0/bral.2.3.0.swagger.json
+      - v2.3.0/ccc.2.3.0.swagger.json
+      - v2.3.0/smel.2.3.0.swagger.json
+      - v2.4.0/bca.2.4.0.swagger.json
+      - v2.4.0/pca.2.4.0.swagger.json
+      - v3.1.10/account-info-openapi.json
+      - v3.1.10/account-info-openapi.yaml
+      - v3.1.10/confirmation-funds-openapi.json
+      - v3.1.10/confirmation-funds-openapi.yaml
+      - v3.1.10/event-notifications-openapi.json
+      - v3.1.10/event-notifications-openapi.yaml
+      - v3.1.10/events-openapi.json
+      - v3.1.10/events-openapi.yaml
+      - v3.1.10/payment-initiation-openapi.json
+      - v3.1.10/payment-initiation-openapi.yaml
+      - v3.1.10/vrp-openapi.json
+      - v3.1.10/vrp-openapi.yaml
+      - v3.1.4/account-info-openapi.json
+      - v3.1.4/account-info-openapi.yaml
+      - v3.1.4/aggregated-polling-openapi.json
+      - v3.1.4/aggregated-polling-openapi.yaml
+      - v3.1.4/callback-urls-openapi.json
+      - v3.1.4/callback-urls-openapi.yaml
+      - v3.1.4/confirmation-funds-openapi.json
+      - v3.1.4/confirmation-funds-openapi.yaml
+      - v3.1.4/event-notifications-openapi.json
+      - v3.1.4/event-notifications-openapi.yaml
+      - v3.1.4/event-subscriptions-openapi.json
+      - v3.1.4/event-subscriptions-openapi.yaml
+      - v3.1.4/events-openapi.json
+      - v3.1.4/events-openapi.yaml
+      - v3.1.4/payment-initiation-openapi.json
+      - v3.1.4/payment-initiation-openapi.yaml
+      - v3.1.5/account-info-openapi.json
+      - v3.1.5/account-info-openapi.yaml
+      - v3.1.5/aggregated-polling-openapi.json
+      - v3.1.5/aggregated-polling-openapi.yaml
+      - v3.1.5/callback-urls-openapi.json
+      - v3.1.5/callback-urls-openapi.yaml
+      - v3.1.5/confirmation-funds-openapi.json
+      - v3.1.5/confirmation-funds-openapi.yaml
+      - v3.1.5/event-notifications-openapi.json
+      - v3.1.5/event-notifications-openapi.yaml
+      - v3.1.5/event-subscriptions-openapi.json
+      - v3.1.5/event-subscriptions-openapi.yaml
+      - v3.1.5/events-openapi.json
+      - v3.1.5/events-openapi.yaml
+      - v3.1.5/payment-initiation-openapi.json
+      - v3.1.5/payment-initiation-openapi.yaml
+      - v3.1.6/account-info-openapi.json
+      - v3.1.6/account-info-openapi.yaml
+      - v3.1.6/aggregated-polling-openapi.json
+      - v3.1.6/aggregated-polling-openapi.yaml
+      - v3.1.6/callback-urls-openapi.json
+      - v3.1.6/callback-urls-openapi.yaml
+      - v3.1.6/confirmation-funds-openapi.json
+      - v3.1.6/confirmation-funds-openapi.yaml
+      - v3.1.6/event-notifications-openapi.json
+      - v3.1.6/event-notifications-openapi.yaml
+      - v3.1.6/event-subscriptions-openapi.json
+      - v3.1.6/event-subscriptions-openapi.yaml
+      - v3.1.6/events-openapi.json
+      - v3.1.6/events-openapi.yaml
+      - v3.1.6/payment-initiation-openapi.json
+      - v3.1.6/payment-initiation-openapi.yaml
+      - v3.1.8/account-info-openapi.json
+      - v3.1.8/account-info-openapi.yaml
+      - v3.1.8/confirmation-funds-openapi.json
+      - v3.1.8/confirmation-funds-openapi.yaml
+      - v3.1.8/event-notifications-openapi.json
+      - v3.1.8/event-notifications-openapi.yaml
+      - v3.1.8/events-openapi.json
+      - v3.1.8/events-openapi.yaml
+      - v3.1.8/payment-initiation-openapi.json
+      - v3.1.8/payment-initiation-openapi.yaml
+      - v3.1.8/vrp-openapi.json
+      - v3.1.8/vrp-openapi.yaml
+      - v3.1.9/account-info-openapi.json
+      - v3.1.9/account-info-openapi.yaml
+      - v3.1.9/confirmation-funds-openapi.json
+      - v3.1.9/confirmation-funds-openapi.yaml
+      - v3.1.9/event-notifications-openapi.json
+      - v3.1.9/event-notifications-openapi.yaml
+      - v3.1.9/events-openapi.json
+      - v3.1.9/events-openapi.yaml
+      - v3.1.9/payment-initiation-openapi.json
+      - v3.1.9/payment-initiation-openapi.yaml
+      - v3.1.9/vrp-openapi.json
+      - v3.1.9/vrp-openapi.yaml
+
