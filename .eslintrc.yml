@@ -8,5 +8,6 @@ rules:
 overrides:
   - files:
     - test/**/*.js
+    - gulpfile.js/**/*.js
     rules:
       import/no-extraneous-dependencies: "off"
